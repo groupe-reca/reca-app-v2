@@ -52,6 +52,18 @@ Non-blocking for scaffolding `src/`; needed before the CI/deploy portion of T-00
 
 - Starting code before the remaining vendor/infra items are confirmed is fine for `src/` scaffolding, but the actual deploy step must not proceed on guesses.
 - PostGIS being left undecided means early migrations must be written so a later JSONB → geometry conversion is additive, not a rewrite.
-- `database.types.ts` is a hand-written placeholder, not yet generated from the real shared Supabase schema — nothing that depends on real table shapes should be built against it as if it were authoritative.
+- `database.types.ts` now has real, migration-derived types for the Missions module's tables (see `tasks.md` T-003), but most of the shared schema (leads, quotes, invoices, payments, users, ...) is still untyped — don't assume the whole file is authoritative yet.
 
 **Validation**: each confirmed decision is recorded in `memory.md` and, where architecturally significant, as an ADR under `docs/adr/` per `docs/16-Development-Standards.md` §162–163.
+
+---
+
+## Active plan: Real database.types.ts generation
+
+**Status**: Partially resolved for the Missions module only (T-003), by hand-deriving types from `reca-app`'s migration files rather than running the actual `supabase gen types typescript` command. This is not the mandated method (`memory.md` says CLI-generated), so it should be replaced when possible.
+
+**What happened**: the shared Supabase project's anon key can query tables (RLS-permitting) but the project blocks both the root OpenAPI introspection endpoint and `OPTIONS`-based column introspection for non-`service_role` keys — the standard no-DB-password ways to run `supabase gen types typescript` don't work here. Probing via the anon key found real table names but not columns (all confirmed tables are empty in this shared dev project). `reca-app`'s migration files (`C:/var/www/html/reca-app/supabase/migrations/`) turned out to have everything needed for the Missions tables specifically.
+
+**Still open**: a real `supabase gen types typescript --db-url <connection-string>` run (or a service_role key, used once locally, never committed) would give complete, authoritative types for the _entire_ schema in one shot, superseding the hand-derived subset. Ask before requesting either — they're more sensitive than the anon key already in `.env`.
+
+**Risk if skipped long-term**: hand-deriving types per-module from migration files (as done for Missions) is slower and can drift from reality if a migration is missed or misread. Fine as a bridge, not a long-term substitute for real introspection.

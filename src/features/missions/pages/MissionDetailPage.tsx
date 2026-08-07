@@ -5,31 +5,30 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { missionStatusMeta } from '@/domain/missionStatus'
-import { mockMissions } from '../mocks'
-
-const mockItems = [
-  { id: 'i1', address: '224 rue Scott', status: 'DONE' as const },
-  { id: 'i2', address: '318 rue Saint-Vallier O', status: 'DONE' as const },
-  { id: 'i3', address: '55 avenue Belvédère', status: 'IN_PROGRESS' as const },
-  { id: 'i4', address: '12 rue des Érables', status: 'PENDING' as const },
-]
+import { useMission } from '../hooks/useMission'
 
 const itemStatusMeta = {
-  DONE: { label: 'Terminé', tone: 'success' as const },
-  IN_PROGRESS: { label: 'En cours', tone: 'info' as const },
-  PENDING: { label: 'À faire', tone: 'neutral' as const },
+  terminee: { label: 'Terminé', tone: 'success' as const },
+  en_cours: { label: 'En cours', tone: 'info' as const },
+  en_attente: { label: 'À faire', tone: 'neutral' as const },
+  a_reprendre: { label: 'À reprendre', tone: 'warning' as const },
+  impossible: { label: 'Impossible', tone: 'danger' as const },
 }
 
 export function MissionDetailPage() {
   const { missionId } = useParams()
-  const mission = mockMissions.find((m) => m.id === missionId)
+  const { data: mission, isLoading, isError } = useMission(missionId)
 
-  if (!mission) {
+  if (isLoading) {
+    return <div className="text-body-sm text-text-muted p-8">Chargement…</div>
+  }
+
+  if (isError || !mission) {
     return (
       <div className="p-8">
         <EmptyState
           title="Mission introuvable"
-          description="Vérifiez le lien ou revenez à la liste des missions."
+          description="Vérifiez le lien, ou l’authentification requise pour lire cette donnée (RLS: rôle authenticated) n’est pas encore en place."
         />
       </div>
     )
@@ -42,7 +41,9 @@ export function MissionDetailPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-body-sm text-text-muted">Mission</p>
-          <h1 className="text-heading-xl font-bold">{mission.number}</h1>
+          <h1 className="text-heading-xl font-bold">
+            {mission.numero !== null ? `Mission #${String(mission.numero)}` : 'Mission'}
+          </h1>
           <p className="text-body-md text-text-secondary mt-1">{mission.routeName}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -82,22 +83,30 @@ export function MissionDetailPage() {
           <Card>
             <CardHeader
               title="Résidences"
-              meta={`${String(mockItems.length)} éléments`}
+              meta={`${String(mission.items.length)} éléments`}
             />
-            <ul className="divide-border divide-y">
-              {mockItems.map((item) => {
-                const itemMeta = itemStatusMeta[item.status]
-                return (
-                  <li
-                    key={item.id}
-                    className="flex items-center justify-between gap-3 py-2.5"
-                  >
-                    <span className="text-body-sm text-text-primary">{item.address}</span>
-                    <StatusBadge label={itemMeta.label} tone={itemMeta.tone} />
-                  </li>
-                )
-              })}
-            </ul>
+            {mission.items.length === 0 ? (
+              <p className="text-body-sm text-text-muted">
+                Aucune résidence sur cette mission.
+              </p>
+            ) : (
+              <ul className="divide-border divide-y">
+                {mission.items.map((item) => {
+                  const itemMeta = itemStatusMeta[item.status]
+                  return (
+                    <li
+                      key={item.id}
+                      className="flex items-center justify-between gap-3 py-2.5"
+                    >
+                      <span className="text-body-sm text-text-primary">
+                        {item.contractNumero ?? '—'} · {item.clientLabel}
+                      </span>
+                      <StatusBadge label={itemMeta.label} tone={itemMeta.tone} />
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
           </Card>
         </div>
 
@@ -118,29 +127,18 @@ export function MissionDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-text-muted">Dernière synchronisation</dt>
-                <dd className="text-text-primary font-medium">
-                  {mission.lastSyncMinutesAgo === null
-                    ? 'Aucune donnée'
-                    : `Il y a ${String(mission.lastSyncMinutesAgo)} min`}
-                </dd>
+                <dt className="text-text-muted">Date</dt>
+                <dd className="text-text-primary font-medium">{mission.date}</dd>
               </div>
             </dl>
           </Card>
 
-          <Card>
-            <CardHeader title="Historique" />
-            <ul className="text-body-sm space-y-3">
-              <li>
-                <p className="text-text-secondary">Mission créée à partir de la route</p>
-                <p className="text-caption text-text-muted">Aujourd’hui, 06:15</p>
-              </li>
-              <li>
-                <p className="text-text-secondary">Opérateur et équipement assignés</p>
-                <p className="text-caption text-text-muted">Aujourd’hui, 06:22</p>
-              </li>
-            </ul>
-          </Card>
+          {mission.notes ? (
+            <Card>
+              <CardHeader title="Notes" />
+              <p className="text-body-sm text-text-secondary">{mission.notes}</p>
+            </Card>
+          ) : null}
         </div>
       </div>
     </div>

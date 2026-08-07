@@ -4,24 +4,17 @@ import { Card, CardHeader } from '@/components/ui/Card'
 import { StatTile } from '@/components/ui/StatTile'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { missionStatusMeta } from '@/domain/missionStatus'
-import { mockMissions } from '@/features/missions/mocks'
+import { useMissions } from '@/features/missions'
 
+// Example/placeholder content — these two panels depend on modules not
+// built yet (Contracts, a real event/audit log) so they stay as
+// illustrative mock data, clearly separated from the real Missions
+// data above. Wire to real sources once those modules exist.
 const attentionItems = [
   {
     id: 'a1',
-    severity: 'danger' as const,
-    text: 'MIS-2026-0042 signale un problème non résolu depuis 22 min',
-    to: '/missions/m2',
-  },
-  {
-    id: 'a2',
-    severity: 'warning' as const,
-    text: 'MIS-2026-0043 n’a pas d’équipement confirmé avant le départ',
-    to: '/missions/m3',
-  },
-  {
-    id: 'a3',
     severity: 'warning' as const,
     text: '3 contrats actifs n’ont pas de zone de déneigement définie',
     to: '/contracts/new',
@@ -29,17 +22,19 @@ const attentionItems = [
 ]
 
 const recentActivity = [
-  { id: 'e1', text: 'Julie Bergeron a démarré MIS-2026-0042', time: 'il y a 7 min' },
-  { id: 'e2', text: 'Problème signalé sur MIS-2026-0042', time: 'il y a 22 min' },
-  { id: 'e3', text: 'MIS-2026-0038 marquée terminée', time: 'il y a 1 h 12' },
+  {
+    id: 'e1',
+    text: 'Exemple : Julie Bergeron a démarré une mission',
+    time: 'il y a 7 min',
+  },
+  { id: 'e2', text: 'Exemple : problème signalé sur une mission', time: 'il y a 22 min' },
 ]
 
 export function DashboardPage() {
-  const activeMissions = mockMissions.filter((m) => m.status === 'IN_PROGRESS')
-  const toPrep = mockMissions.filter(
-    (m) => m.status === 'PLANNED' || m.status === 'READY',
-  )
-  const problemCount = mockMissions.filter((m) => m.hasProblem).length
+  const { data: missions, isLoading, isError } = useMissions()
+  const activeMissions = (missions ?? []).filter((m) => m.status === 'IN_PROGRESS')
+  const toPrep = (missions ?? []).filter((m) => m.status === 'PLANNED')
+  const problemCount = (missions ?? []).filter((m) => m.hasProblem).length
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-6 p-4 lg:p-8">
@@ -65,7 +60,7 @@ export function DashboardPage() {
         />
         <StatTile label="À préparer" value={String(toPrep.length)} tone="info" />
         <StatTile label="Problèmes ouverts" value={String(problemCount)} tone="danger" />
-        <StatTile label="Synchronisation" value="5/6" tone="warning" />
+        <StatTile label="Synchronisation" value="—" tone="neutral" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -73,7 +68,9 @@ export function DashboardPage() {
           <Card>
             <CardHeader
               title="Missions actives"
-              meta={`${String(activeMissions.length)} en cours`}
+              meta={
+                isLoading ? 'Chargement…' : `${String(activeMissions.length)} en cours`
+              }
               action={
                 <Link
                   to="/missions"
@@ -83,40 +80,56 @@ export function DashboardPage() {
                 </Link>
               }
             />
-            <ul className="space-y-3">
-              {activeMissions.map((mission) => {
-                const meta = missionStatusMeta[mission.status]
-                return (
-                  <li key={mission.id}>
-                    <Link
-                      to={`/missions/${mission.id}`}
-                      className="border-border hover:bg-surface-hover block rounded-lg border p-3 transition-colors"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-text-primary font-semibold">
-                          {mission.number}
+            {isError ? (
+              <p className="text-body-sm text-status-danger">
+                Impossible de charger les missions.
+              </p>
+            ) : !isLoading && activeMissions.length === 0 ? (
+              <EmptyState
+                title="Aucune mission active"
+                description="Aucune mission en cours n’a été trouvée. Si des données existent en base, l’authentification (RLS: rôle authenticated) est peut-être requise pour les voir."
+              />
+            ) : (
+              <ul className="space-y-3">
+                {activeMissions.map((mission) => {
+                  const meta = missionStatusMeta[mission.status]
+                  return (
+                    <li key={mission.id}>
+                      <Link
+                        to={`/missions/${mission.id}`}
+                        className="border-border hover:bg-surface-hover block rounded-lg border p-3 transition-colors"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-text-primary font-semibold">
+                            {mission.numero !== null
+                              ? `Mission #${String(mission.numero)}`
+                              : 'Mission'}
+                          </p>
+                          <StatusBadge label={meta.label} tone={meta.tone} />
+                        </div>
+                        <p className="text-body-sm text-text-muted mt-0.5">
+                          {mission.routeName}
                         </p>
-                        <StatusBadge label={meta.label} tone={meta.tone} />
-                      </div>
-                      <p className="text-body-sm text-text-muted mt-0.5">
-                        {mission.routeName}
-                      </p>
-                      <div className="mt-2">
-                        <ProgressBar value={mission.itemsDone} max={mission.itemsTotal} />
-                      </div>
-                      <p className="text-body-sm text-text-secondary mt-2">
-                        {mission.operatorName} · {mission.equipmentName}
-                        {mission.hasProblem ? (
-                          <span className="text-status-danger ml-2 font-medium">
-                            Problème signalé
-                          </span>
-                        ) : null}
-                      </p>
-                    </Link>
-                  </li>
-                )
-              })}
-            </ul>
+                        <div className="mt-2">
+                          <ProgressBar
+                            value={mission.itemsDone}
+                            max={mission.itemsTotal}
+                          />
+                        </div>
+                        <p className="text-body-sm text-text-secondary mt-2">
+                          {mission.operatorName} · {mission.equipmentName}
+                          {mission.hasProblem ? (
+                            <span className="text-status-danger ml-2 font-medium">
+                              Problème signalé
+                            </span>
+                          ) : null}
+                        </p>
+                      </Link>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
           </Card>
 
           <Card>
@@ -135,7 +148,7 @@ export function DashboardPage() {
           <Card>
             <CardHeader
               title="À traiter"
-              meta={`${String(attentionItems.length)} éléments`}
+              meta={`${String(attentionItems.length)} éléments (exemple)`}
             />
             <ul className="space-y-2">
               {attentionItems.map((item) => (
@@ -157,7 +170,7 @@ export function DashboardPage() {
           </Card>
 
           <Card>
-            <CardHeader title="Activité récente" />
+            <CardHeader title="Activité récente" meta="Exemple" />
             <ul className="space-y-3">
               {recentActivity.map((event) => (
                 <li key={event.id} className="text-body-sm">

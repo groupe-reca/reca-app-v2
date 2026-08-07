@@ -5,12 +5,11 @@ import { StatusBadge } from '@/components/ui/StatusBadge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { missionStatusMeta, type MissionStatus } from '@/domain/missionStatus'
-import { mockMissions } from '../mocks'
+import { useMissions } from '../hooks/useMissions'
 
 const filterChips: { label: string; status: MissionStatus | 'ALL' }[] = [
   { label: 'Toutes', status: 'ALL' },
   { label: 'En cours', status: 'IN_PROGRESS' },
-  { label: 'Prêtes', status: 'READY' },
   { label: 'Planifiées', status: 'PLANNED' },
   { label: 'Terminées', status: 'COMPLETED' },
 ]
@@ -18,17 +17,18 @@ const filterChips: { label: string; status: MissionStatus | 'ALL' }[] = [
 export function MissionListPage() {
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<MissionStatus | 'ALL'>('ALL')
+  const { data: allMissions, isLoading, isError } = useMissions()
 
   const missions = useMemo(() => {
-    return mockMissions.filter((mission) => {
+    return (allMissions ?? []).filter((mission) => {
       const matchesStatus = statusFilter === 'ALL' || mission.status === statusFilter
       const matchesQuery =
         query.trim().length === 0 ||
-        mission.number.toLowerCase().includes(query.toLowerCase()) ||
+        String(mission.numero ?? '').includes(query) ||
         mission.routeName.toLowerCase().includes(query.toLowerCase())
       return matchesStatus && matchesQuery
     })
-  }, [query, statusFilter])
+  }, [allMissions, query, statusFilter])
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-5 p-4 lg:p-8">
@@ -36,7 +36,9 @@ export function MissionListPage() {
         <div>
           <h1 className="text-heading-xl font-bold">Missions</h1>
           <p className="text-body-sm text-text-muted mt-1">
-            {missions.length} mission{missions.length > 1 ? 's' : ''}
+            {isLoading
+              ? 'Chargement…'
+              : `${String(missions.length)} mission${missions.length > 1 ? 's' : ''}`}
           </p>
         </div>
         <Button>Créer une mission</Button>
@@ -71,10 +73,15 @@ export function MissionListPage() {
         ))}
       </div>
 
-      {missions.length === 0 ? (
+      {isError ? (
+        <EmptyState
+          title="Impossible de charger les missions"
+          description="Une erreur est survenue lors de la lecture des données. Réessayez plus tard."
+        />
+      ) : !isLoading && missions.length === 0 ? (
         <EmptyState
           title="Aucune mission trouvée"
-          description="Essayez d’ajuster la recherche ou les filtres."
+          description="Essayez d’ajuster la recherche ou les filtres. Si des missions existent dans la base, la connexion (authentification) est peut-être requise pour les voir — les policies RLS de missions n’autorisent que le rôle authenticated."
         />
       ) : (
         <div className="rounded-card border-border overflow-hidden border">
@@ -98,7 +105,11 @@ export function MissionListPage() {
                 return (
                   <tr key={mission.id} className="bg-surface hover:bg-surface-hover">
                     <td className="px-4 py-3">
-                      <p className="text-text-primary font-semibold">{mission.number}</p>
+                      <p className="text-text-primary font-semibold">
+                        {mission.numero !== null
+                          ? `Mission #${String(mission.numero)}`
+                          : 'Mission'}
+                      </p>
                       <p className="text-text-muted">{mission.routeName}</p>
                     </td>
                     <td className="hidden px-4 py-3 sm:table-cell">

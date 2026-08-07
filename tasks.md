@@ -41,12 +41,21 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
   - [ ] Real Mapbox integration for the two map placeholders in Dashboard/Mission detail — deferred, needs a Mapbox token decision
   - [ ] All data is mock data (`src/features/*/mocks.ts`) — not wired to the real shared Supabase schema yet (depends on `database.types.ts` being regenerated, see T-001)
 
-### T-003 — Business modules (not yet scoped)
+### T-003 — Business modules
 
-- **Status**: Not started
+- **Status**: In progress — Missions module built end-to-end against the real shared Supabase project (verified in-browser: real network calls to `https://ynsuxctqsvusbgcudcno.supabase.co`, 200 responses). Other 9 modules not started.
 - **Priority**: Medium
-- **Dependencies**: T-002 Master UI patterns (done). Real Supabase data (T-001 remaining items) needed before any module goes beyond mock data.
-- **Acceptance criteria**: not yet defined. Per `docs/00-Vision.md` §33 and §14, modules to scope individually as they're picked up: Leads, Soumissions, Clients, Contrats, Routes, Missions, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, not designed independently.
+- **Dependencies**: T-002 Master UI patterns (done).
+- **Missions — done (first slice)**:
+  - [x] Real domain model (`src/features/missions/domain/mission.types.ts`), repository interface + Supabase implementation, mapper with an explicit anti-corruption layer (`mapLegacyMissionStatus`) translating the DB's French `statut` values to the app's `MissionStatus` — see `src/domain/missionStatus.ts`
+  - [x] `database.types.ts` now has real types for `missions`, `mission_items`, `mission_events`, `mission_notes`, plus minimal `routes`/`route_contracts`/`employees`/`equipments`/`contracts`/`clients` columns, hand-derived from `reca-app`'s actual migration files (not guessed) — see file header for the full method and its limits
+  - [x] `MissionListPage` and `MissionDetailPage` (and Dashboard's "Missions actives" panel) now query real data via `useMissions()`/`useMission()` (TanStack Query) instead of mocks; `mocks.ts` deleted as dead code
+  - [x] `.env` populated with the real Supabase project's `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`/`VITE_MAPBOX_TOKEN` (from `.input/.env`, gitignored, never committed)
+  - **Known limitation, not a bug**: all Missions RLS policies in `reca-app`'s migrations are `for select to authenticated` only — the anon key can never see rows, by design, until real Supabase Auth sign-in exists. Confirmed via real network requests returning `200` with empty arrays (not errors). The UI's empty states say this explicitly rather than looking broken. **Building a real auth/login flow is the next real blocker for seeing actual data**, not something wrong with the Missions wiring.
+  - [ ] `database.types.ts` is still hand-derived, not from a real `supabase gen types typescript` run (this project's anon key can't introspect schema, and no DB connection string/service_role was available) — see `plans.md`
+  - [ ] Mission creation/assignment/status-change mutations not built yet — read-only so far
+  - [ ] Bundle size warning at build (`654 kB`, `> 500 kB` threshold) — route-level code splitting (`docs/16-Development-Standards.md` §70) not done yet, noted but not blocking
+- **Remaining 9 modules**: not yet scoped. Per `docs/00-Vision.md` §33 and §14: Leads, Soumissions, Clients, Contrats, Routes, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, following the same real-schema cross-check process used for Missions (read `reca-app`'s migrations, don't guess column names).
 
 ---
 
