@@ -1,1 +1,126 @@
 @import 'tailwindcss';
+
+/* Design tokens per docs/01-Design-System.md. Components must use the
+   semantic tokens (surface/text/border/status), never brand hex values
+   directly, so both themes stay correct automatically. */
+@theme {
+  --font-sans:
+    'Manrope', Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  --color-brand-red: #ed1c24;
+  --color-brand-red-hover: #d9161e;
+  --color-brand-red-pressed: #be1118;
+  --color-brand-navy: #0f172a;
+  --color-brand-navy-deep: #08111f;
+  --color-brand-navy-raised: #131e33;
+  --color-brand-blue-logo: #193557;
+
+  --color-status-success: #16a36a;
+  --color-status-success-soft: #ddf7eb;
+  --color-status-info: #2f7de1;
+  --color-status-info-soft: #e2eeff;
+  --color-status-warning: #d98a0a;
+  --color-status-warning-soft: #fff1d6;
+  --color-status-danger: #d92d3a;
+  --color-status-danger-soft: #fde4e7;
+  --color-status-neutral: #64748b;
+  --color-status-neutral-soft: #e8edf3;
+
+  /* Semantic tokens — values come from :root / [data-theme] below so
+     both themes resolve through the same utility classes (bg-surface,
+     text-primary, border-default, …). */
+  --color-background: var(--rt-background);
+  --color-surface: var(--rt-surface);
+  --color-surface-raised: var(--rt-surface-raised);
+  --color-surface-sunken: var(--rt-surface-sunken);
+  --color-surface-hover: var(--rt-surface-hover);
+  --color-text-primary: var(--rt-text-primary);
+  --color-text-secondary: var(--rt-text-secondary);
+  --color-text-muted: var(--rt-text-muted);
+  --color-text-disabled: var(--rt-text-disabled);
+  --color-border: var(--rt-border);
+  --color-border-strong: var(--rt-border-strong);
+  --color-focus: var(--rt-focus);
+
+  /* Typography scale — docs/01-Design-System.md §8.3. Weight is applied
+     separately via font-semibold/font-bold utilities per component. */
+  --text-display-lg: 2.25rem;
+  --text-display-lg--line-height: 2.75rem;
+  --text-display-md: 1.875rem;
+  --text-display-md--line-height: 2.375rem;
+  --text-heading-xl: 1.625rem;
+  --text-heading-xl--line-height: 2.125rem;
+  --text-heading-lg: 1.375rem;
+  --text-heading-lg--line-height: 1.875rem;
+  --text-heading-md: 1.125rem;
+  --text-heading-md--line-height: 1.625rem;
+  --text-heading-sm: 1rem;
+  --text-heading-sm--line-height: 1.5rem;
+  --text-body-lg: 1rem;
+  --text-body-lg--line-height: 1.5625rem;
+  --text-body-md: 0.875rem;
+  --text-body-md--line-height: 1.375rem;
+  --text-body-sm: 0.8125rem;
+  --text-body-sm--line-height: 1.25rem;
+  --text-label-md: 0.8125rem;
+  --text-label-md--line-height: 1.125rem;
+  --text-label-sm: 0.75rem;
+  --text-label-sm--line-height: 1rem;
+  --text-caption: 0.6875rem;
+  --text-caption--line-height: 0.9375rem;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-card: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+
+  --shadow-card: var(--rt-shadow-card);
+  --shadow-floating: var(--rt-shadow-floating);
+}
+
+:root,
+[data-theme='dark'] {
+  --rt-background: #08111f;
+  --rt-surface: #0f1a2d;
+  --rt-surface-raised: #152238;
+  --rt-surface-sunken: #0a1424;
+  --rt-surface-hover: #1a2941;
+
+  --rt-text-primary: #f8fafc;
+  --rt-text-secondary: #c4cede;
+  --rt-text-muted: #8795aa;
+  --rt-text-disabled: #58667a;
+
+  --rt-border: rgba(148, 163, 184, 0.16);
+  --rt-border-strong: rgba(148, 163, 184, 0.28);
+  --rt-focus: #5ea0ff;
+
+  --rt-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.18), 0 12px 32px rgba(0, 0, 0, 0.16);
+  --rt-shadow-floating: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme='light'] {
+  --rt-background: #f3f5f8;
+  --rt-surface: #ffffff;
+  --rt-surface-raised: #ffffff;
+  --rt-surface-sunken: #edf1f5;
+  --rt-surface-hover: #f6f8fa;
+
+  --rt-text-primary: #111827;
+  --rt-text-secondary: #475569;
+  --rt-text-muted: #718096;
+  --rt-text-disabled: #a0aaba;
+
+  --rt-border: rgba(15, 23, 42, 0.1);
+  --rt-border-strong: rgba(15, 23, 42, 0.18);
+  --rt-focus: #2f7de1;
+
+  --rt-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  --rt-shadow-floating: 0 8px 28px rgba(15, 23, 42, 0.14);
+}
+
+body {
+  font-variant-numeric: tabular-nums;
+}

@@ -25,10 +25,28 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
 
 ### T-002 — Master UI screens
 
-- **Status**: Not started
+- **Status**: Done (first pass) — all six patterns exist, verified in-browser (desktop). Mobile viewport not device-confirmed (sandbox couldn't resize the browser window), but the mobile shell uses the same `hidden`/breakpoint mechanism already confirmed working elsewhere (e.g. the missions table's responsive columns).
 - **Priority**: High
-- **Dependencies**: T-001 complete
-- **Acceptance criteria**: the six Master UI models exist and are used as the pattern source for derived modules — Centre des opérations, entity list, commercial record (fiche commerciale), operational record (fiche opérationnelle), complex form, mobile experience (`docs/00-Vision.md` §34).
+- **Dependencies**: T-001 core scaffold (done)
+- **Acceptance criteria**: the six Master UI models exist and are used as the pattern source for derived modules (`docs/00-Vision.md` §34):
+  - [x] Centre des opérations — `src/features/dashboard/pages/DashboardPage.tsx` (`/operations`): status banner, stat tiles, active missions, à traiter panel, recent activity, map placeholder
+  - [x] Liste d'entités — `src/features/missions/pages/MissionListPage.tsx` (`/missions`): search, filter chips, responsive table
+  - [x] Fiche commerciale — `src/features/clients/pages/ClientDetailPage.tsx` (`/clients/:clientId`): header, stat banner, tabs, notes panel
+  - [x] Fiche opérationnelle — `src/features/missions/pages/MissionDetailPage.tsx` (`/missions/:missionId`): status/progress, assignment, item list, problem banner, history
+  - [x] Formulaire complexe — `src/features/contracts/pages/ContractWizardPage.tsx` (`/contracts/new`): 3-step wizard, React Hook Form + Zod validation per step, step navigation
+  - [x] Expérience mobile — `AppShell` (`src/layouts/AppShell.tsx`) renders a distinct bottom-nav + compact layout below the `lg` breakpoint instead of the desktop sidebar, per `docs/01-Design-System.md` mobile nav spec
+  - [x] Design tokens implemented in `src/styles/index.css` per `docs/01-Design-System.md` (colors, typography scale, radius, shadows, dark/light themes with a working toggle)
+  - [x] Core UI primitives: `Button`, `StatusBadge`, `Card`/`CardHeader`, `StatTile`, `ProgressBar`, `EmptyState` in `src/components/ui/`
+  - [ ] Real icon system — not decided yet, nav/UI currently text-only (no invented icon set)
+  - [ ] Real Mapbox integration for the two map placeholders in Dashboard/Mission detail — deferred, needs a Mapbox token decision
+  - [ ] All data is mock data (`src/features/*/mocks.ts`) — not wired to the real shared Supabase schema yet (depends on `database.types.ts` being regenerated, see T-001)
+
+### T-003 — Business modules (not yet scoped)
+
+- **Status**: Not started
+- **Priority**: Medium
+- **Dependencies**: T-002 Master UI patterns (done). Real Supabase data (T-001 remaining items) needed before any module goes beyond mock data.
+- **Acceptance criteria**: not yet defined. Per `docs/00-Vision.md` §33 and §14, modules to scope individually as they're picked up: Leads, Soumissions, Clients, Contrats, Routes, Missions, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, not designed independently.
 
 ---
 

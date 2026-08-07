@@ -8,7 +8,16 @@ Read this file (along with `tasks.md`, `plans.md`, `file-index.md`, and `CLAUDE.
 
 ## Status
 
-The `src/` scaffold, tooling (TypeScript strict, ESLint, Prettier, Vitest, Playwright), and CI pipeline exist and are green (`pnpm check` passes). **PostGIS is explicitly deferred, not decided** — see `docs/adr/ADR-003-postgis.md`. Vendor/infra choices with no docs default (monitoring, analytics, feature flags tooling, Storybook, deployment platform) remain open and are tracked in `plans.md` per `docs/16-Development-Standards.md` §195. `src/infrastructure/supabase/database.types.ts` is currently a hand-written placeholder, not yet generated from the real shared schema — see `tasks.md` T-001.
+The `src/` scaffold, tooling (TypeScript strict, ESLint, Prettier, Vitest, Playwright), and CI pipeline exist and are green (`pnpm check` passes). The six Master UI screens (`tasks.md` T-002) are built and verified in-browser at desktop width, using mock data. **PostGIS is explicitly deferred, not decided** — see `docs/adr/ADR-003-postgis.md`. Vendor/infra choices with no docs default (monitoring, analytics, feature flags tooling, Storybook, deployment platform) remain open and are tracked in `plans.md` per `docs/16-Development-Standards.md` §195. `src/infrastructure/supabase/database.types.ts` is currently a hand-written placeholder, not yet generated from the real shared schema — see `tasks.md` T-001. Icon system and Mapbox integration are not decided yet.
+
+## Master UI decisions (T-002)
+
+- **Design tokens**: implemented literally per `docs/01-Design-System.md` §6–8 in `src/styles/index.css` — brand/status color tokens, dark (primary) and light theme CSS variable sets under `[data-theme]`, Manrope typography scale, radius/shadow scale. Theme defaults to dark (per §5.1) with a working toggle (`src/app/useTheme.ts`) persisted to `localStorage`.
+- **Navigation structure**: sidebar sections/items and mobile bottom-nav items in `src/layouts/navigation.ts` match the exact order given in `docs/02-Information-Architecture.md`. Do not reorder without checking that doc.
+- **Mobile is handled as a responsive shell, not a separate route tree**: `AppShell` swaps sidebar → bottom nav at the `lg` (1024px) breakpoint via Tailwind utilities (`hidden lg:flex` / `lg:hidden`), rather than building fully separate mobile route components. This was a scope call for the first pass — acceptable per `docs/16-Development-Standards.md` §75 (structural responsive differences may use dedicated markup blocks, not necessarily separate components), but revisit if a screen needs mobile-specific data/behavior beyond layout.
+- **No icon library adopted** — nav and UI are currently text-only. Docs don't specify an icon system; this needs a real decision (and likely real brand assets per `docs/01-Design-System.md` §4.1) before one is picked, not an invented icon set.
+- **Map placeholders**: Dashboard and Mission detail have explicit "carte à venir" placeholders instead of Mapbox, since Mapbox needs an API token decision not yet made. Don't silently wire up a real map without that decision.
+- **Mock data**: `src/features/{missions,clients}/mocks.ts` are placeholder fixtures, clearly commented as not-Supabase-backed. Real data requires `database.types.ts` to be regenerated first (T-001).
 
 ## Bootstrap decisions
 
