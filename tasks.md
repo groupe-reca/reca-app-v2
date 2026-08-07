@@ -19,8 +19,8 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
   - [x] TypeScript strict mode enabled with the flags listed in `docs/16-Development-Standards.md` §15 (`tsconfig.app.json` / `tsconfig.node.json`)
   - [x] Supabase client wired up in `src/infrastructure/supabase/client.ts`; ESLint rule blocks `createClient` imports from anywhere else
   - [x] CI pipeline (`.github/workflows/ci.yml`, GitHub Actions) runs format/lint/typecheck/tests/build on push and PR — provider choice noted in `memory.md`, not left silently assumed
-  - [ ] `src/infrastructure/supabase/database.types.ts` is currently a hand-written placeholder — must be replaced by running `supabase gen types typescript` once real project credentials are available (see note in that file)
-  - [ ] `.env` populated with real `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` for the shared Supabase project so the app can actually talk to data (currently only `.env.example` exists)
+  - [~] `src/infrastructure/supabase/database.types.ts` now has real, migration-derived types for `missions`/`mission_items`/`mission_events`/`mission_notes`/`users` and minimal joined columns (see T-003) — still not from an actual `supabase gen types typescript` run, and most of the schema (leads, quotes, invoices, payments, ...) is still untyped
+  - [x] `.env` populated with real `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` / `VITE_MAPBOX_TOKEN` for the shared Supabase project (from `.input/.env`, gitignored)
   - [ ] Remaining open vendor/infra decisions in `plans.md` (monitoring, analytics, feature flags, Storybook, deployment platform) resolved
 
 ### T-002 — Master UI screens
@@ -51,11 +51,30 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
   - [x] `database.types.ts` now has real types for `missions`, `mission_items`, `mission_events`, `mission_notes`, plus minimal `routes`/`route_contracts`/`employees`/`equipments`/`contracts`/`clients` columns, hand-derived from `reca-app`'s actual migration files (not guessed) — see file header for the full method and its limits
   - [x] `MissionListPage` and `MissionDetailPage` (and Dashboard's "Missions actives" panel) now query real data via `useMissions()`/`useMission()` (TanStack Query) instead of mocks; `mocks.ts` deleted as dead code
   - [x] `.env` populated with the real Supabase project's `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`/`VITE_MAPBOX_TOKEN` (from `.input/.env`, gitignored, never committed)
-  - **Known limitation, not a bug**: all Missions RLS policies in `reca-app`'s migrations are `for select to authenticated` only — the anon key can never see rows, by design, until real Supabase Auth sign-in exists. Confirmed via real network requests returning `200` with empty arrays (not errors). The UI's empty states say this explicitly rather than looking broken. **Building a real auth/login flow is the next real blocker for seeing actual data**, not something wrong with the Missions wiring.
+  - **Resolved by T-004 (Auth)**: Missions RLS requires `authenticated`, which login now provides. Real data will still be empty until an actual Supabase Auth account exists and has data assigned to it (dev/test account provisioning is separate work, not attempted — see docs/05 §147, no account creation on the real project without explicit authorization).
   - [ ] `database.types.ts` is still hand-derived, not from a real `supabase gen types typescript` run (this project's anon key can't introspect schema, and no DB connection string/service_role was available) — see `plans.md`
   - [ ] Mission creation/assignment/status-change mutations not built yet — read-only so far
-  - [ ] Bundle size warning at build (`654 kB`, `> 500 kB` threshold) — route-level code splitting (`docs/16-Development-Standards.md` §70) not done yet, noted but not blocking
+  - [ ] Bundle size warning at build (`662 kB`, `> 500 kB` threshold) — route-level code splitting (`docs/16-Development-Standards.md` §70) not done yet, noted but not blocking
 - **Remaining 9 modules**: not yet scoped. Per `docs/00-Vision.md` §33 and §14: Leads, Soumissions, Clients, Contrats, Routes, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, following the same real-schema cross-check process used for Missions (read `reca-app`'s migrations, don't guess column names).
+
+### T-004 — Auth module
+
+- **Status**: Done (first slice) — real login/logout against Supabase Auth, verified end-to-end in-browser (real `POST /auth/v1/token` requests) and with Playwright (`pnpm exec playwright test --project=chromium`, 2/2 passing).
+- **Priority**: High (was blocking real data everywhere — see T-003)
+- **Dependencies**: none
+- **What's built**:
+  - [x] `src/domain/session.ts` — `AppSession`/`Role` matching the **real** simplified model in `reca-app`'s DB (`users.role`: `administrateur` | `employe` | `operateur`, per `supabase/migrations/20260709143631_users.sql` + `20260723010000_users_role_operateur.sql`), not the aspirational full permission-matrix model in `docs/05-Authentication-Roles-Permissions.md` §10–21 (that matrix is explicitly marked "à valider avant production" and isn't backed by any real RLS policy yet — see `memory.md`)
+  - [x] `src/app/SessionContext.tsx` — `SessionProvider`/`useSession()`, resolves Supabase Auth state + the matching `public.users` row into an `AppSession`
+  - [x] `src/features/auth/` — `LoginPage` (email/password, generic error messages per docs §30, "mot de passe oublié" via `resetPasswordForEmail`), `RequireAuth` route guard (loading/unauthenticated/suspended-account states), `useLogin`/`useLogout`
+  - [x] Router: `/login` is public; every other route is nested under `RequireAuth` → `AppShell`
+  - [x] `AppShell` topbar shows the signed-in user and a working "Déconnexion" button
+  - [x] `database.types.ts` has a real `users` table type + the `update_own_theme` RPC signature
+  - [x] `tests/e2e/smoke.spec.ts` rewritten to match reality (was stale from T-002 — asserted on a heading that no longer existed and didn't account for the new login redirect); now tests the real redirect-to-login and the real invalid-credentials error path
+- **Explicitly not built yet** (documented, not silently skipped):
+  - [ ] No self-registration — matches docs §28/§31 (admin-invite-only model), but there's also no admin-side "invite a user" UI yet, so provisioning real accounts currently requires the Supabase dashboard directly
+  - [ ] No real permission-key system (`hasPermission()`, `RequirePermission`) — deferred until the docs' full permission matrix is actually validated and backed by real RLS (see `memory.md`); `canWrite()`/`isOperator()` in `session.ts` cover what's real today
+  - [ ] MFA, invitations, password-change-while-logged-in, session-revocation admin UI, security-event audit log — all out of scope for this first slice, per docs §149's own "decisions to confirm before final implementation" list
+  - [ ] `mobile-safari` (WebKit) Playwright project can't run in this dev sandbox — missing `msvcp140_1.dll`, a Windows system dependency outside repo control; `chromium` project is the one actually verified
 
 ---
 

@@ -4,40 +4,51 @@ import { DashboardPage } from '@/features/dashboard'
 import { MissionListPage, MissionDetailPage } from '@/features/missions'
 import { ClientDetailPage } from '@/features/clients'
 import { ContractWizardPage } from '@/features/contracts'
+import { LoginPage, RequireAuth } from '@/features/auth'
 import { NotFoundPage } from '@/features/misc/pages/NotFoundPage'
 
 export const router = createBrowserRouter([
   {
+    path: '/login',
+    element: <LoginPage />,
+    handle: { breadcrumb: 'Connexion' },
+  },
+  {
     path: '/',
-    element: <AppShell />,
+    element: <RequireAuth />,
     children: [
-      { index: true, element: <Navigate to="/operations" replace /> },
       {
-        path: 'operations',
-        element: <DashboardPage />,
-        handle: { breadcrumb: 'Centre des opérations' },
+        element: <AppShell />,
+        children: [
+          { index: true, element: <Navigate to="/operations" replace /> },
+          {
+            path: 'operations',
+            element: <DashboardPage />,
+            handle: { breadcrumb: 'Centre des opérations' },
+          },
+          {
+            path: 'missions',
+            element: <MissionListPage />,
+            handle: { breadcrumb: 'Missions' },
+          },
+          {
+            path: 'missions/:missionId',
+            element: <MissionDetailPage />,
+            handle: { breadcrumb: 'Mission' },
+          },
+          {
+            path: 'clients/:clientId',
+            element: <ClientDetailPage />,
+            handle: { breadcrumb: 'Client' },
+          },
+          {
+            path: 'contracts/new',
+            element: <ContractWizardPage />,
+            handle: { breadcrumb: 'Nouveau contrat' },
+          },
+          { path: '*', element: <NotFoundPage />, handle: { breadcrumb: 'Introuvable' } },
+        ],
       },
-      {
-        path: 'missions',
-        element: <MissionListPage />,
-        handle: { breadcrumb: 'Missions' },
-      },
-      {
-        path: 'missions/:missionId',
-        element: <MissionDetailPage />,
-        handle: { breadcrumb: 'Mission' },
-      },
-      {
-        path: 'clients/:clientId',
-        element: <ClientDetailPage />,
-        handle: { breadcrumb: 'Client' },
-      },
-      {
-        path: 'contracts/new',
-        element: <ContractWizardPage />,
-        handle: { breadcrumb: 'Nouveau contrat' },
-      },
-      { path: '*', element: <NotFoundPage />, handle: { breadcrumb: 'Introuvable' } },
     ],
   },
 ])

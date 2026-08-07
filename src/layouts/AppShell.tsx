@@ -1,5 +1,7 @@
 import { NavLink, Outlet, useMatches } from 'react-router-dom'
 import { useTheme } from '@/app/useTheme'
+import { useSession } from '@/app/SessionContext'
+import { useLogout } from '@/features/auth'
 import { cn } from '@/lib/cn'
 import { mobileNavItems, navSections } from './navigation'
 
@@ -17,6 +19,8 @@ function useBreadcrumb(): string {
 export function AppShell() {
   const breadcrumb = useBreadcrumb()
   const { preference, setPreference } = useTheme()
+  const { session } = useSession()
+  const logout = useLogout()
 
   return (
     <div className="bg-background text-text-primary min-h-screen">
@@ -90,6 +94,23 @@ export function AppShell() {
               >
                 {preference === 'dark' ? '☀️' : '🌙'}
               </button>
+
+              {session ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-body-sm text-text-secondary hidden sm:inline">
+                    {session.displayName ?? session.email}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout.mutate()
+                    }}
+                    className="border-border-strong text-body-sm text-text-secondary hover:bg-surface-hover flex h-9 items-center rounded-md border px-3"
+                  >
+                    Déconnexion
+                  </button>
+                </div>
+              ) : null}
             </div>
           </header>
 

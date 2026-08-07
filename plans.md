@@ -66,4 +66,4 @@ Non-blocking for scaffolding `src/`; needed before the CI/deploy portion of T-00
 
 **Still open**: a real `supabase gen types typescript --db-url <connection-string>` run (or a service_role key, used once locally, never committed) would give complete, authoritative types for the _entire_ schema in one shot, superseding the hand-derived subset. Ask before requesting either — they're more sensitive than the anon key already in `.env`.
 
-**Risk if skipped long-term**: hand-deriving types per-module from migration files (as done for Missions) is slower and can drift from reality if a migration is missed or misread. Fine as a bridge, not a long-term substitute for real introspection.
+**Risk if skipped long-term**: hand-deriving types per-module from migration files (as done for Missions, and now `users` for T-004 Auth) is slower and can drift from reality if a migration is missed or misread. Fine as a bridge, not a long-term substitute for real introspection.

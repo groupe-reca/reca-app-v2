@@ -6,14 +6,13 @@
 // typescript` could not be run directly; a DB connection string would
 // let that run for real and should replace this file when available.
 //
-// Only tables touched by the Missions module (T-003) are typed so far:
-// missions, mission_items, mission_events, mission_notes, plus the
-// minimal columns of routes/route_contracts/employees/equipments/
-// contracts/clients needed to join and display them. Other tables
-// exist in the shared DB (leads, quotes, invoices, payments, users,
-// ...) but are not typed here yet — add them as their modules are
-// scoped, following the same migration-file cross-check process
-// (docs/adr/ADR-002-operator-contracts.md).
+// Tables typed so far: missions, mission_items, mission_events,
+// mission_notes, users (Auth module), plus the minimal columns of
+// routes/route_contracts/employees/equipments/contracts/clients
+// needed to join and display them. Other tables exist in the shared DB
+// (leads, quotes, invoices, payments, ...) but are not typed here yet
+// — add them as their modules are scoped, following the same
+// migration-file cross-check process (docs/adr/ADR-002-operator-contracts.md).
 //
 // This file is committed per memory.md ("DB type generation") — do not
 // hand-edit casually without re-checking against reca-app's migrations
@@ -327,9 +326,38 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['clients']['Insert']>
         Relationships: []
       }
+      users: {
+        Row: {
+          id: string
+          email: string
+          role: 'administrateur' | 'employe' | 'operateur'
+          actif: boolean
+          nom: string | null
+          theme: 'clair' | 'sombre'
+          derniere_connexion: string | null
+          deleted_at: string | null
+        }
+        Insert: {
+          id: string
+          email: string
+          role?: Database['public']['Tables']['users']['Row']['role']
+          actif?: boolean
+          nom?: string | null
+          theme?: Database['public']['Tables']['users']['Row']['theme']
+          derniere_connexion?: string | null
+          deleted_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['users']['Insert']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      update_own_theme: {
+        Args: { new_theme: 'clair' | 'sombre' }
+        Returns: undefined
+      }
+    }
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>
   }
