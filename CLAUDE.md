@@ -96,17 +96,18 @@ React + Vite + TypeScript strict + React Router + TanStack Query + React Hook Fo
 
 RECA App V2 shares brand DNA with RECA Opérateur (RECA red, navy blue navigation surfaces, functional color semantics: red = brand/critical/destructive, green = success/active, blue = info/navigation, amber = attention, gray = secondary/inactive) but is a distinct composition — a data + map command center (multi-mission, desktop/tablet/mobile) vs. the operator app's map-first, single-mission, in-vehicle experience. Don't copy operator screens; share the underlying system instead. See `docs/01-Design-System.md` for full detail.
 
-Core UX principle: every important screen must answer three questions — *What's happening now? What needs my attention? What's the next action?* Desktop is a dense professional tool, not a stretched mobile view; mobile is purpose-built (bottom sheets, sticky actions, one-handed use), not a stack of desktop cards.
+Core UX principle: every important screen must answer three questions — _What's happening now? What needs my attention? What's the next action?_ Desktop is a dense professional tool, not a stretched mobile view; mobile is purpose-built (bottom sheets, sticky actions, one-handed use), not a stack of desktop cards.
 
 ## Business domain model
 
 The canonical chain: `Lead → Quote (Soumission) → Client → Contract → Snow removal zone → Route → Mission → MissionItem → Execution (via RECA Opérateur) → History → Invoicing/stats`.
 
 Key distinctions to preserve:
+
 - A **Contract** is a permanent commercial engagement; it is not a Mission.
 - A **Route** is a permanent, reusable ordered template of contracts; it is not a Mission.
 - A **Mission** is a real execution for a specific event (storm, de-icing, callback); it owns MissionItems, assignments, progress, problems.
-- A **MissionItem** is an operational *snapshot* of a site for one mission — it must preserve history and must never be silently rewritten by a later contract edit. Historical data (geometry used, assigned operator/equipment, price, clauses at the time) must stay frozen.
+- A **MissionItem** is an operational _snapshot_ of a site for one mission — it must preserve history and must never be silently rewritten by a later contract edit. Historical data (geometry used, assigned operator/equipment, price, clauses at the time) must stay frozen.
 
 RECA App V2 prepares/distributes/supervises data for RECA Opérateur and receives back statuses, timing, problems, notes, and sync state from it — treat "last known data" vs "live data" vs "operator offline" as distinct, explicit UI states; never imply real-time precision when data is stale.
 

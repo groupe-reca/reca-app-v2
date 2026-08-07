@@ -1,0 +1,13 @@
+node_modules
+dist
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+src/infrastructure/supabase/database.types.ts
+
+# Official specification and legacy mockup content — not owned by
+# tooling, must not be reformatted incidentally by `pnpm format`.
+docs/
+claude-code-design-mockup/
+maquettes-visuelles/

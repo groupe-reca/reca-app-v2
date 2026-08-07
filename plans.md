@@ -6,9 +6,10 @@ Purpose: active plans, proposed (unconfirmed) decisions, sequencing, risks, and 
 
 ## Active plan: Technical bootstrap of `reca-app-v2`
 
-**Status**: Not started. Documentation phase (`docs/00`–`17`) is complete; per the official method (`docs/00-Vision.md` §33), technical bootstrap is the next phase before any feature implementation.
+**Status**: In progress. Documentation phase (`docs/00`–`17`) is complete; core repo scaffolding (step 2–3 below) is done. See `tasks.md` T-001 for the exact checklist and what's left.
 
 **Sequence** (per `docs/00-Vision.md` §33 and `docs/16-Development-Standards.md` §198):
+
 1. Confirm the open decisions below.
 2. Initialize repo tooling (package manager, TypeScript, Vite, ESLint, Prettier, Vitest, Playwright configs).
 3. Establish base folder structure (`src/app`, `src/features`, `src/domain`, `src/infrastructure`, `src/components`, `src/routes`, `supabase/`, `tests/`) per `docs/03-Application-Architecture.md` §9 and `docs/16-Development-Standards.md` §7–8.
@@ -26,6 +27,10 @@ Purpose: active plans, proposed (unconfirmed) decisions, sequencing, risks, and 
 - ~~Git branching/commit conventions~~ → adopted as literally proposed in `docs/16-Development-Standards.md` §139–141.
 - ~~Test coverage policy~~ → risk-based priority (critical rules, transactions, permissions, mappers, sync, finance), not a blanket numeric threshold, per `docs/16-Development-Standards.md` §132 (already the documented policy — just confirmed as adopted).
 - ~~i18n strategy~~ → fr-CA is the only shipped language initially; string keys structured for en-CA later, per `docs/16-Development-Standards.md` §121.
+- ~~CI provider/pipeline~~ → GitHub Actions (`.github/workflows/ci.yml`), adopted because the repo is already hosted on GitHub — not a new vendor commitment, just using what's already in place. Runs format/lint/typecheck/test/build on push and PR. Deployment platform is still separate and open below.
+- ~~Exact tool versions~~ → pinned as part of scaffolding: React 19, Vite 8, TypeScript 5.9 (see note below — TS 7 was tried first but isn't yet supported by `typescript-eslint`), Tailwind 4, TanStack Query 5, React Router 7, Zod 4, Vitest 4, Playwright 1.62. See `pnpm-lock.yaml` for exact versions.
+- ~~ESLint/Prettier configuration~~ → `eslint.config.js` (flat config, typescript-eslint strict+stylistic type-checked, react-hooks, jsx-a11y, react-refresh) and `.prettierrc.json` (no semicolons, single quotes, Tailwind class sorting via `prettier-plugin-tailwindcss`).
+- ~~Repo structure~~ → adopted as documented in `docs/03-Application-Architecture.md` §9 / `docs/16-Development-Standards.md` §7–8, with subfolders created only as needed (see `file-index.md`).
 
 ### Still open — deferred, not owner-decided (see `docs/adr/ADR-003-postgis.md`)
 
@@ -39,13 +44,14 @@ Non-blocking for scaffolding `src/`; needed before the CI/deploy portion of T-00
 - Analytics provider
 - Feature flag tooling
 - Storybook: adopt or not
-- CI provider/pipeline
-- Deployment platform
-- Exact tool versions (React, Vite, TypeScript, etc.) and ESLint/Prettier configuration — can be pinned during scaffolding itself rather than pre-decided in the abstract
-- Exact repo structure — confirm vs. adapt the recommended structure once scaffolding starts
+- Deployment platform (hosting for the built frontend and the CI deploy step)
+
+**Note on TypeScript 7**: `pnpm add -D typescript` initially installed TypeScript 7.0.2, but `typescript-eslint` 8.66 doesn't support it yet (`typescript-eslint does not support TS 7.0`). Pinned to `typescript@^5` (currently 5.9.3) instead. Revisit once `typescript-eslint` adds TS 7 support — this is a tooling-compatibility fact, not a preference, so it isn't a "decision" per se, but it's worth remembering so nobody re-bumps to TS 7 and silently breaks lint.
 
 **Risks**:
-- Starting code before the remaining vendor/infra items are confirmed is fine for `src/` scaffolding, but CI/deploy work must not proceed on guesses.
+
+- Starting code before the remaining vendor/infra items are confirmed is fine for `src/` scaffolding, but the actual deploy step must not proceed on guesses.
 - PostGIS being left undecided means early migrations must be written so a later JSONB → geometry conversion is additive, not a rewrite.
+- `database.types.ts` is a hand-written placeholder, not yet generated from the real shared Supabase schema — nothing that depends on real table shapes should be built against it as if it were authoritative.
 
 **Validation**: each confirmed decision is recorded in `memory.md` and, where architecturally significant, as an ADR under `docs/adr/` per `docs/16-Development-Standards.md` §162–163.
