@@ -7,7 +7,7 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
 ## Open tasks
 
 ### T-001 — Technical bootstrap of `reca-app-v2`
-- **Status**: Not started
+- **Status**: In progress
 - **Priority**: High (blocks all feature work)
 - **Dependencies**: Confirm the open decisions tracked in `plans.md` under "Technical bootstrap of `reca-app-v2`" (package manager, versions, ESLint/Prettier, repo structure, Operator-contract strategy, monitoring, feature flags, PostGIS, DB type generation, CI/deploy, i18n, coverage policy, Git conventions).
 - **Acceptance criteria**:
