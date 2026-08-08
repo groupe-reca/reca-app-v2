@@ -43,7 +43,7 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
 
 ### T-003 — Business modules
 
-- **Status**: In progress — Missions and Clients modules built end-to-end against the real shared Supabase project, both **confirmed showing real data** signed in as an actual admin account. Other 8 modules not started.
+- **Status**: In progress — Missions, Clients, and Routes modules built end-to-end against the real shared Supabase project, all **confirmed showing real data** signed in as an actual admin account. Other 7 modules not started.
 - **Priority**: Medium
 - **Dependencies**: T-002 Master UI patterns (done).
 - **Missions — done (first slice)**:
@@ -67,7 +67,14 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
   - [x] **Dropped the fictional "Solde" (balance) stat from T-002's mock**: checked `reca-app`'s real `ClientContractsCard`/`ClientInvoicesCard` and confirmed there is no "solde" concept computed anywhere in the reference app either — it shows a contracts total and a separate invoices total, no combined balance. Since the Invoices module isn't built yet, the client detail now shows a real "Valeur des contrats" stat instead of an invented balance figure.
   - [x] `database.types.ts`: expanded `contracts` with `saison`/`date_signature`/`date_debut`/`date_fin` (needed for the contracts list); money values (`contracts.prix`) are stored as decimal dollars in the DB, converted to `MoneyCents` in the mapper to match this app's `docs/16-Development-Standards.md` §25 money convention
   - [x] Verified live signed in as the real `administrateur` account: 30 real clients listed with real names/phones/cities, opened a real client (Claude Lemire) showing a real address, real contract (CTR-000055, 1 000,00 $, ACTIF) — money conversion confirmed correct
-- **Remaining 8 modules**: not yet scoped. Per `docs/00-Vision.md` §33 and §14: Leads, Soumissions, Contrats, Routes, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, following the same real-schema cross-check process used for Missions and Clients (read `reca-app`'s migrations, don't guess column names).
+- **Routes — done (first slice, read-only)**:
+  - [x] Real domain model (`src/features/routes/domain/route.types.ts`), repository interface + Supabase implementation, mapper — `RouteSummary` (name, colour, operator, equipment, contract count) and `RouteDetail` (ordered `route_contracts` joined to `contracts` for numero/address/status)
+  - [x] `database.types.ts`: added `contracts.adresse_geocodee` (needed to show each stop's address in route order) — cross-checked against `reca-app`'s real `routeContracts.service.ts`, which selects exactly that column for the same purpose
+  - [x] New `RouteListPage` (`/routes`) and `RouteDetailPage` (`/routes/:routeId`) — neither existed before; `routes` was already a nav link with no page behind it
+  - [x] Confirmed RLS matches Missions' non-operator write pattern, not Clients': `routes`/`route_contracts` writes are `administrateur`-only with no operator exception (`reca-app/supabase/migrations/20260722020000_routes_v2.sql`) — relevant for when write mutations are built here later
+  - [x] **No write mutations built** (create/reorder/assign/transfer contract) — `reca-app`'s real implementation is meaningfully more complex here: `assignContractToRoute` first soft-removes any existing active `route_contracts` row for that contract (a contract can only be on one route at a time) before inserting, and `reorderRouteContract` calls a dedicated `reorder_route_contract` Postgres RPC rather than a plain `UPDATE`. Scoped out to keep this slice read-only and correct rather than rushing a shallower, buggier version of real multi-step logic; a real next step, not a gap papered over.
+  - [x] Verified live signed in as the real `administrateur` account: 3 real routes (LaSalle, LaSalle 2, St-Jérôme) with real operator/equipment/contract-count, opened LaSalle showing its 3 real contracts in real visit order with real geocoded addresses (including CTR-000055, the same contract seen on the Clients module test — cross-module consistency confirmed)
+- **Remaining 7 modules**: not yet scoped. Per `docs/00-Vision.md` §33 and §14: Leads, Soumissions, Contrats, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, following the same real-schema cross-check process used for Missions/Clients/Routes (read `reca-app`'s migrations, don't guess column names).
 
 ### T-004 — Auth module
 

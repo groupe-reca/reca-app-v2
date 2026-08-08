@@ -3,6 +3,7 @@ import { AppShell } from '@/layouts/AppShell'
 import { DashboardPage } from '@/features/dashboard'
 import { MissionListPage, MissionDetailPage } from '@/features/missions'
 import { ClientListPage, ClientDetailPage } from '@/features/clients'
+import { RouteListPage, RouteDetailPage } from '@/features/routes'
 import { ContractWizardPage } from '@/features/contracts'
 import { LoginPage, RequireAuth } from '@/features/auth'
 import { NotFoundPage } from '@/features/misc/pages/NotFoundPage'
@@ -35,6 +36,16 @@ export const router = createBrowserRouter([
             path: 'missions/:missionId',
             element: <MissionDetailPage />,
             handle: { breadcrumb: 'Mission' },
+          },
+          {
+            path: 'routes',
+            element: <RouteListPage />,
+            handle: { breadcrumb: 'Routes' },
+          },
+          {
+            path: 'routes/:routeId',
+            element: <RouteDetailPage />,
+            handle: { breadcrumb: 'Route' },
           },
           {
             path: 'clients',
