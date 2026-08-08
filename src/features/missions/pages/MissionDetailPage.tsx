@@ -6,18 +6,34 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { missionStatusMeta } from '@/domain/missionStatus'
 import { useMission } from '../hooks/useMission'
+import { useUpdateMissionStatus } from '../hooks/useUpdateMissionStatus'
+import { useUpdateMissionItemStatus } from '../hooks/useUpdateMissionItemStatus'
+import type { MissionItemDetail } from '../domain/mission.types'
 
-const itemStatusMeta = {
-  terminee: { label: 'Terminé', tone: 'success' as const },
-  en_cours: { label: 'En cours', tone: 'info' as const },
-  en_attente: { label: 'À faire', tone: 'neutral' as const },
-  a_reprendre: { label: 'À reprendre', tone: 'warning' as const },
-  impossible: { label: 'Impossible', tone: 'danger' as const },
+const itemStatusMeta: Record<
+  MissionItemDetail['status'],
+  { label: string; tone: 'success' | 'info' | 'neutral' | 'warning' | 'danger' }
+> = {
+  terminee: { label: 'Terminé', tone: 'success' },
+  en_cours: { label: 'En cours', tone: 'info' },
+  en_attente: { label: 'À faire', tone: 'neutral' },
+  a_reprendre: { label: 'À reprendre', tone: 'warning' },
+  impossible: { label: 'Impossible', tone: 'danger' },
 }
+
+const itemStatusOptions: { value: MissionItemDetail['status']; label: string }[] = [
+  { value: 'en_attente', label: 'À faire' },
+  { value: 'en_cours', label: 'En cours' },
+  { value: 'terminee', label: 'Terminé' },
+  { value: 'a_reprendre', label: 'À reprendre' },
+  { value: 'impossible', label: 'Impossible' },
+]
 
 export function MissionDetailPage() {
   const { missionId } = useParams()
   const { data: mission, isLoading, isError } = useMission(missionId)
+  const updateStatus = useUpdateMissionStatus(missionId ?? '')
+  const updateItemStatus = useUpdateMissionItemStatus(missionId ?? '')
 
   if (isLoading) {
     return <div className="text-body-sm text-text-muted p-8">Chargement…</div>
@@ -48,10 +64,45 @@ export function MissionDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <StatusBadge label={meta.label} tone={meta.tone} />
-          <Button variant="secondary">Assigner</Button>
-          <Button>Démarrer</Button>
+          {mission.status === 'PLANNED' ? (
+            <Button
+              loading={updateStatus.isPending}
+              onClick={() => {
+                updateStatus.mutate('IN_PROGRESS')
+              }}
+            >
+              Démarrer
+            </Button>
+          ) : null}
+          {mission.status === 'IN_PROGRESS' ? (
+            <>
+              <Button
+                variant="secondary"
+                loading={updateStatus.isPending}
+                onClick={() => {
+                  updateStatus.mutate('COMPLETED_WITH_ISSUES')
+                }}
+              >
+                Terminer avec anomalies
+              </Button>
+              <Button
+                loading={updateStatus.isPending}
+                onClick={() => {
+                  updateStatus.mutate('COMPLETED')
+                }}
+              >
+                Terminer
+              </Button>
+            </>
+          ) : null}
         </div>
       </div>
+
+      {updateStatus.isError ? (
+        <div className="border-status-danger/40 bg-status-danger-soft text-body-sm text-status-danger rounded-lg border px-4 py-3">
+          Impossible de mettre à jour le statut de la mission. Vérifiez vos permissions.
+        </div>
+      ) : null}
 
       {mission.hasProblem ? (
         <div className="border-status-danger/40 bg-status-danger-soft text-body-sm text-status-danger rounded-lg border px-4 py-3">
@@ -101,12 +152,36 @@ export function MissionDetailPage() {
                       <span className="text-body-sm text-text-primary">
                         {item.contractNumero ?? '—'} · {item.clientLabel}
                       </span>
-                      <StatusBadge label={itemMeta.label} tone={itemMeta.tone} />
+                      <div className="flex items-center gap-2">
+                        <StatusBadge label={itemMeta.label} tone={itemMeta.tone} />
+                        <select
+                          value={item.status}
+                          disabled={updateItemStatus.isPending}
+                          onChange={(event) => {
+                            updateItemStatus.mutate({
+                              itemId: item.id,
+                              status: event.target.value as MissionItemDetail['status'],
+                            })
+                          }}
+                          className="border-border-strong bg-surface text-body-sm text-text-secondary rounded-md border px-2 py-1"
+                        >
+                          {itemStatusOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </li>
                   )
                 })}
               </ul>
             )}
+            {updateItemStatus.isError ? (
+              <p className="text-body-sm text-status-danger mt-2">
+                Impossible de mettre à jour cette résidence. Vérifiez vos permissions.
+              </p>
+            ) : null}
           </Card>
         </div>
 

@@ -39,3 +39,15 @@ const legacyToMissionStatus: Record<LegacyMissionStatus, MissionStatus> = {
 export function mapLegacyMissionStatus(value: LegacyMissionStatus): MissionStatus {
   return legacyToMissionStatus[value]
 }
+
+const missionStatusToLegacy: Record<MissionStatus, LegacyMissionStatus> = {
+  PLANNED: 'planifiee',
+  IN_PROGRESS: 'en_cours',
+  COMPLETED: 'terminee',
+  COMPLETED_WITH_ISSUES: 'terminee_avec_anomalies',
+  CANCELLED: 'annulee',
+}
+
+export function mapMissionStatusToLegacy(value: MissionStatus): LegacyMissionStatus {
+  return missionStatusToLegacy[value]
+}

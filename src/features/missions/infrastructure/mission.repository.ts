@@ -1,8 +1,29 @@
 import { supabase } from '@/infrastructure/supabase/client'
 import type { Database } from '@/infrastructure/supabase/database.types'
+import { mapMissionStatusToLegacy, type MissionStatus } from '@/domain/missionStatus'
 import type { MissionRepository } from '../domain/mission.repository'
-import type { MissionDetail, MissionId, MissionSummary } from '../domain/mission.types'
+import type {
+  MissionDetail,
+  MissionId,
+  MissionItemDetail,
+  MissionSummary,
+} from '../domain/mission.types'
 import { mapMissionRowToDetail, mapMissionRowToSummary } from './mission.mapper'
+
+type MissionEventType = Database['public']['Tables']['mission_events']['Row']['type']
+
+// Same transition -> event mapping as reca-app's
+// missions.service.ts#updateMissionStatus (mirrored, not reinvented).
+// PLANNED has no corresponding "transition to" event (missions start
+// there); pause/resume events exist in the DB's mission_events check
+// constraint but have no matching missions.statut value in the real
+// schema, so they're not modeled as a status transition here.
+const statusTransitionEvent: Partial<Record<MissionStatus, MissionEventType>> = {
+  IN_PROGRESS: 'mission_debutee',
+  COMPLETED: 'mission_terminee',
+  COMPLETED_WITH_ISSUES: 'mission_terminee_avec_anomalies',
+  CANCELLED: 'mission_annulee',
+}
 
 type MissionItemRow = Database['public']['Tables']['mission_items']['Row']
 
@@ -126,5 +147,41 @@ export class SupabaseMissionRepository implements MissionRepository {
       contractsById: new Map(contractsResult.data.map((c) => [c.id, c])),
       clientsById: new Map(clientsResult.data.map((c) => [c.id, c])),
     })
+  }
+
+  async updateStatus(id: MissionId, status: MissionStatus): Promise<void> {
+    const legacyStatus = mapMissionStatusToLegacy(status)
+    const patch: Database['public']['Tables']['missions']['Update'] = {
+      statut: legacyStatus,
+    }
+    if (status === 'IN_PROGRESS') patch.heure_debut = new Date().toISOString()
+    if (status === 'COMPLETED' || status === 'COMPLETED_WITH_ISSUES') {
+      patch.heure_fin = new Date().toISOString()
+    }
+
+    const { error } = await supabase.from('missions').update(patch).eq('id', id)
+    if (error) throw error
+
+    // Mirrors reca-app's missions.service.ts#updateMissionStatus: log the
+    // transition atomically-enough for a UI action (RLS still guards both
+    // writes independently — see mission_events_insert_authenticated).
+    const eventType = statusTransitionEvent[status]
+    if (eventType) {
+      const { error: eventError } = await supabase
+        .from('mission_events')
+        .insert({ mission_id: id, type: eventType, payload: { statut: legacyStatus } })
+      if (eventError) throw eventError
+    }
+  }
+
+  async updateItemStatus(
+    itemId: string,
+    status: MissionItemDetail['status'],
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('mission_items')
+      .update({ statut: status })
+      .eq('id', itemId)
+    if (error) throw error
   }
 }
