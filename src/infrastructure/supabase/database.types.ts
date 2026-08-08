@@ -294,6 +294,8 @@ export interface Database {
           date_debut: string | null
           date_fin: string | null
           adresse_geocodee: string | null
+          notes: string | null
+          created_at: string
           deleted_at: string | null
         }
         Insert: {
@@ -308,6 +310,8 @@ export interface Database {
           date_debut?: string | null
           date_fin?: string | null
           adresse_geocodee?: string | null
+          notes?: string | null
+          created_at?: string
           deleted_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['contracts']['Insert']>

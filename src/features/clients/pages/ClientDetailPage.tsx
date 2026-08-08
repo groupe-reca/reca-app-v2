@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
@@ -131,9 +131,12 @@ export function ClientDetailPage() {
                         className="flex items-center justify-between gap-3 py-2.5"
                       >
                         <div>
-                          <p className="text-body-sm text-text-primary font-semibold">
+                          <Link
+                            to={`/contracts/${contract.id}`}
+                            className="text-body-sm text-status-info font-semibold hover:underline"
+                          >
                             {contract.numero ?? '—'}
-                          </p>
+                          </Link>
                           <p className="text-body-sm text-text-muted">
                             {[contract.type, contract.saison]
                               .filter(Boolean)

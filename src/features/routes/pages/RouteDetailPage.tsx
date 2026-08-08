@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Card, CardHeader } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -84,9 +84,12 @@ export function RouteDetailPage() {
                       {contract.ordre + 1}
                     </span>
                     <div>
-                      <p className="text-body-sm text-text-primary font-semibold">
+                      <Link
+                        to={`/contracts/${contract.contractId}`}
+                        className="text-body-sm text-status-info font-semibold hover:underline"
+                      >
                         {contract.contractNumero ?? '—'}
-                      </p>
+                      </Link>
                       <p className="text-body-sm text-text-muted">
                         {contract.address ?? 'Adresse non renseignée'}
                       </p>

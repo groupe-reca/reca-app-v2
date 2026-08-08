@@ -43,7 +43,7 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
 
 ### T-003 — Business modules
 
-- **Status**: In progress — Missions, Clients, and Routes modules built end-to-end against the real shared Supabase project, all **confirmed showing real data** signed in as an actual admin account. Other 7 modules not started.
+- **Status**: In progress — Missions, Clients, Routes, and Contrats modules built end-to-end against the real shared Supabase project, all **confirmed showing real data** signed in as an actual admin account. Other 6 modules not started.
 - **Priority**: Medium
 - **Dependencies**: T-002 Master UI patterns (done).
 - **Missions — done (first slice)**:
@@ -74,7 +74,14 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
   - [x] Confirmed RLS matches Missions' non-operator write pattern, not Clients': `routes`/`route_contracts` writes are `administrateur`-only with no operator exception (`reca-app/supabase/migrations/20260722020000_routes_v2.sql`) — relevant for when write mutations are built here later
   - [x] **No write mutations built** (create/reorder/assign/transfer contract) — `reca-app`'s real implementation is meaningfully more complex here: `assignContractToRoute` first soft-removes any existing active `route_contracts` row for that contract (a contract can only be on one route at a time) before inserting, and `reorderRouteContract` calls a dedicated `reorder_route_contract` Postgres RPC rather than a plain `UPDATE`. Scoped out to keep this slice read-only and correct rather than rushing a shallower, buggier version of real multi-step logic; a real next step, not a gap papered over.
   - [x] Verified live signed in as the real `administrateur` account: 3 real routes (LaSalle, LaSalle 2, St-Jérôme) with real operator/equipment/contract-count, opened LaSalle showing its 3 real contracts in real visit order with real geocoded addresses (including CTR-000055, the same contract seen on the Clients module test — cross-module consistency confirmed)
-- **Remaining 7 modules**: not yet scoped. Per `docs/00-Vision.md` §33 and §14: Leads, Soumissions, Contrats, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, following the same real-schema cross-check process used for Missions/Clients/Routes (read `reca-app`'s migrations, don't guess column names).
+- **Contrats — done (first slice, read-only)**:
+  - [x] Real domain model (`src/features/contracts/domain/contract.types.ts`), repository interface + Supabase implementation, mapper — `ContractSummary`/`ContractDetail` joined to `clients` for the client's display name, same dollars→cents money conversion pattern as the Clients module
+  - [x] `database.types.ts`: added `contracts.notes`/`created_at` (needed for the detail page)
+  - [x] New `ContractListPage` (`/contracts`) and `ContractDetailPage` (`/contracts/:contractId`) — `/contracts` previously 404'd (only `/contracts/new`, the wizard, existed); "Contrats" is already a nav link
+  - [x] Cross-linked contract numbers from `ClientDetailPage`'s and `RouteDetailPage`'s contract rows to the new `/contracts/:id`, and the contract detail page links back to its client — verified the round trip live (Contract → Client → same contract shown again)
+  - [x] **Deliberately did not touch `ContractWizardPage`'s mock creation flow**: checked `reca-app`'s real `contracts.service.ts` first and found real contract creation is genuinely large — satellite property/zone capture, generated legal clauses, wizard-default settings lookup, automatic invoice-schedule generation, soft-delete/upsert zone syncing. Wiring the existing 3-step mock wizard to a real `insert` would produce a contract missing everything the real system requires (zones, clauses, pricing basis) — worse than leaving it clearly marked as a mock. Real contract creation needs to be scoped as its own task once Zones/Invoices exist, not bolted onto this pass.
+  - [x] Verified live signed in as the real `administrateur` account: 34 real contracts listed with real client names and prices, opened CTR-000055 (the same contract already verified via Clients and Routes) showing real dates/address/status, followed the client link successfully
+- **Remaining 6 modules**: not yet scoped. Per `docs/00-Vision.md` §33 and §14: Leads, Soumissions, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, following the same real-schema cross-check process used for Missions/Clients/Routes/Contrats (read `reca-app`'s migrations, don't guess column names). Real contract _creation_ (replacing the mock wizard) is tracked here too, blocked on Zones/Invoices scope.
 
 ### T-004 — Auth module
 

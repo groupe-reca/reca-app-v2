@@ -4,7 +4,11 @@ import { DashboardPage } from '@/features/dashboard'
 import { MissionListPage, MissionDetailPage } from '@/features/missions'
 import { ClientListPage, ClientDetailPage } from '@/features/clients'
 import { RouteListPage, RouteDetailPage } from '@/features/routes'
-import { ContractWizardPage } from '@/features/contracts'
+import {
+  ContractWizardPage,
+  ContractListPage,
+  ContractDetailPage,
+} from '@/features/contracts'
 import { LoginPage, RequireAuth } from '@/features/auth'
 import { NotFoundPage } from '@/features/misc/pages/NotFoundPage'
 
@@ -58,9 +62,19 @@ export const router = createBrowserRouter([
             handle: { breadcrumb: 'Client' },
           },
           {
+            path: 'contracts',
+            element: <ContractListPage />,
+            handle: { breadcrumb: 'Contrats' },
+          },
+          {
             path: 'contracts/new',
             element: <ContractWizardPage />,
             handle: { breadcrumb: 'Nouveau contrat' },
+          },
+          {
+            path: 'contracts/:contractId',
+            element: <ContractDetailPage />,
+            handle: { breadcrumb: 'Contrat' },
           },
           { path: '*', element: <NotFoundPage />, handle: { breadcrumb: 'Introuvable' } },
         ],
