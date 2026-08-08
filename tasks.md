@@ -43,7 +43,7 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
 
 ### T-003 — Business modules
 
-- **Status**: In progress — Missions module built end-to-end against the real shared Supabase project (verified in-browser: real network calls to `https://ynsuxctqsvusbgcudcno.supabase.co`, 200 responses). Other 9 modules not started.
+- **Status**: In progress — Missions module built end-to-end against the real shared Supabase project, **and confirmed showing real data** signed in as an actual admin account (real missions, real residences with real client names joined through `mission_items → contracts → clients`, correct status badges throughout). Other 9 modules not started.
 - **Priority**: Medium
 - **Dependencies**: T-002 Master UI patterns (done).
 - **Missions — done (first slice)**:
@@ -51,7 +51,7 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
   - [x] `database.types.ts` now has real types for `missions`, `mission_items`, `mission_events`, `mission_notes`, plus minimal `routes`/`route_contracts`/`employees`/`equipments`/`contracts`/`clients` columns, hand-derived from `reca-app`'s actual migration files (not guessed) — see file header for the full method and its limits
   - [x] `MissionListPage` and `MissionDetailPage` (and Dashboard's "Missions actives" panel) now query real data via `useMissions()`/`useMission()` (TanStack Query) instead of mocks; `mocks.ts` deleted as dead code
   - [x] `.env` populated with the real Supabase project's `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`/`VITE_MAPBOX_TOKEN` (from `.input/.env`, gitignored, never committed)
-  - **Resolved by T-004 (Auth)**: Missions RLS requires `authenticated`, which login now provides. Real data will still be empty until an actual Supabase Auth account exists and has data assigned to it (dev/test account provisioning is separate work, not attempted — see docs/05 §147, no account creation on the real project without explicit authorization).
+  - [x] **Confirmed end-to-end with a real account**: signed in as the real `administrateur` account, saw real data throughout — dashboard ("Bonjour", 1 mission en cours, real active-mission card), missions list (8 real missions, correct status badges: EN COURS/TERMINÉE/TERMINÉE AVEC ANOMALIES/ANNULÉE), mission detail (real residences with real contract numbers and client names), logout works. This closes out the "empty due to RLS" limitation noted after T-004 shipped.
   - [ ] `database.types.ts` is still hand-derived, not from a real `supabase gen types typescript` run (this project's anon key can't introspect schema, and no DB connection string/service_role was available) — see `plans.md`
   - [ ] Mission creation/assignment/status-change mutations not built yet — read-only so far
   - [ ] Bundle size warning at build (`662 kB`, `> 500 kB` threshold) — route-level code splitting (`docs/16-Development-Standards.md` §70) not done yet, noted but not blocking
