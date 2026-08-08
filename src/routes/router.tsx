@@ -15,6 +15,9 @@ import {
   ContractListPage,
   ContractDetailPage,
   ContractWizardPage,
+  LeadListPage,
+  LeadDetailPage,
+  LeadCreatePage,
 } from './lazyPages'
 
 export const router = createBrowserRouter([
@@ -69,6 +72,21 @@ export const router = createBrowserRouter([
             path: 'clients/:clientId',
             element: <ClientDetailPage />,
             handle: { breadcrumb: 'Client' },
+          },
+          {
+            path: 'leads',
+            element: <LeadListPage />,
+            handle: { breadcrumb: 'Leads' },
+          },
+          {
+            path: 'leads/new',
+            element: <LeadCreatePage />,
+            handle: { breadcrumb: 'Nouveau lead' },
+          },
+          {
+            path: 'leads/:leadId',
+            element: <LeadDetailPage />,
+            handle: { breadcrumb: 'Lead' },
           },
           {
             path: 'contracts',

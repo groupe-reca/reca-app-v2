@@ -8,13 +8,14 @@
 //
 // Tables typed so far: missions, mission_items, mission_events,
 // mission_notes, users (Auth module), clients (Clients module, full
-// columns), routes/route_contracts/employees/equipments (minimal
-// columns needed to join and display them), contracts (columns needed
-// for the client's contract list — not yet the full contract-wizard
-// field set, e.g. clauses/taxes/geometry are still missing). Other
-// tables exist in the shared DB (leads, quotes, invoices, payments,
-// ...) but are not typed here yet — add them as their modules are
-// scoped, following the same migration-file cross-check process
+// columns), leads (Leads module, full columns), routes/route_contracts/
+// employees/equipments (minimal columns needed to join and display
+// them), contracts (columns needed for the client's contract list —
+// not yet the full contract-wizard field set, e.g. clauses/taxes/
+// geometry are still missing). Other tables exist in the shared DB
+// (quotes, invoices, payments, ...) but are not typed here yet — add
+// them as their modules are scoped, following the same migration-file
+// cross-check process
 // (docs/adr/ADR-002-operator-contracts.md).
 //
 // This file is committed per memory.md ("DB type generation") — do not
@@ -379,6 +380,50 @@ export interface Database {
           deleted_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['users']['Insert']>
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          id: string
+          numero: string | null
+          prenom: string
+          nom: string
+          telephone: string | null
+          courriel: string | null
+          adresse: string | null
+          ville: string | null
+          code_postal: string | null
+          type_service: string | null
+          message: string | null
+          source: string | null
+          statut: 'nouveau' | 'contacte' | 'soumission_envoyee' | 'converti' | 'perdu'
+          assigne_a: string | null
+          rappel_le: string | null
+          rappel_note: string | null
+          created_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          numero?: string | null
+          prenom: string
+          nom: string
+          telephone?: string | null
+          courriel?: string | null
+          adresse?: string | null
+          ville?: string | null
+          code_postal?: string | null
+          type_service?: string | null
+          message?: string | null
+          source?: string | null
+          statut?: Database['public']['Tables']['leads']['Row']['statut']
+          assigne_a?: string | null
+          rappel_le?: string | null
+          rappel_note?: string | null
+          created_at?: string
+          deleted_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['leads']['Insert']>
         Relationships: []
       }
     }

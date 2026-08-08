@@ -2,6 +2,7 @@ import { SupabaseMissionRepository } from '@/features/missions/infrastructure/mi
 import { SupabaseClientRepository } from '@/features/clients/infrastructure/client.repository'
 import { SupabaseRouteRepository } from '@/features/routes/infrastructure/route.repository'
 import { SupabaseContractRepository } from '@/features/contracts/infrastructure/contract.repository'
+import { SupabaseLeadRepository } from '@/features/leads/infrastructure/lead.repository'
 
 // docs/03-Application-Architecture.md §89 — concrete adapters assembled
 // in one place; use cases/hooks depend on the interfaces, not on this
@@ -11,4 +12,5 @@ export const dependencies = {
   clientRepository: new SupabaseClientRepository(),
   routeRepository: new SupabaseRouteRepository(),
   contractRepository: new SupabaseContractRepository(),
+  leadRepository: new SupabaseLeadRepository(),
 }
