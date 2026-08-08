@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { NavLink, Outlet, useMatches } from 'react-router-dom'
 import { useTheme } from '@/app/useTheme'
 import { useSession } from '@/app/SessionContext'
@@ -115,7 +116,15 @@ export function AppShell() {
           </header>
 
           <main className="flex-1 overflow-y-auto pb-20 lg:pb-0">
-            <Outlet />
+            <Suspense
+              fallback={
+                <div className="text-body-sm text-text-muted flex h-full items-center justify-center p-8">
+                  Chargement…
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
           </main>
         </div>
       </div>

@@ -1,21 +1,30 @@
+import { Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppShell } from '@/layouts/AppShell'
-import { DashboardPage } from '@/features/dashboard'
-import { MissionListPage, MissionDetailPage } from '@/features/missions'
-import { ClientListPage, ClientDetailPage } from '@/features/clients'
-import { RouteListPage, RouteDetailPage } from '@/features/routes'
+import { RequireAuth } from '@/features/auth'
+import { NotFoundPage } from '@/features/misc/pages/NotFoundPage'
 import {
-  ContractWizardPage,
+  LoginPage,
+  DashboardPage,
+  MissionListPage,
+  MissionDetailPage,
+  RouteListPage,
+  RouteDetailPage,
+  ClientListPage,
+  ClientDetailPage,
   ContractListPage,
   ContractDetailPage,
-} from '@/features/contracts'
-import { LoginPage, RequireAuth } from '@/features/auth'
-import { NotFoundPage } from '@/features/misc/pages/NotFoundPage'
+  ContractWizardPage,
+} from './lazyPages'
 
 export const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: (
+      <Suspense fallback={null}>
+        <LoginPage />
+      </Suspense>
+    ),
     handle: { breadcrumb: 'Connexion' },
   },
   {

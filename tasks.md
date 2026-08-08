@@ -58,7 +58,7 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
     - `MissionDetailPage` shows the right action buttons per status (Démarrer when `PLANNED`, Terminer/Terminer avec anomalies when `IN_PROGRESS`, nothing on terminal states) and an editable status `<select>` per résidence
     - **"Assign operator/equipment" was scoped out, not built**: `reca-app`'s real `missions.service.ts` has no post-creation reassignment function — operator/equipment are only set at mission creation (`createMission`). Building a fake "Assigner" mutation would have been inventing a capability that doesn't exist in the reference system; the placeholder button from T-002 was removed instead of wired to nothing.
     - Verified live signed in as the real `administrateur` account: changed a real résidence's status via the dropdown (À faire → En cours), confirmed the real write + refetch round-tripped correctly (badge updated, no optimistic-UI trick involved), then reverted it back to leave the data as found. Mission-level `Démarrer` wasn't clicked live — no `PLANIFIÉE` mission currently exists in the shared dev data to test it non-destructively — but the conditional button rendering was confirmed correct for the `EN COURS` state, and the code mirrors the read-path pattern already proven working.
-  - [ ] Bundle size warning at build (`671 kB`, `> 500 kB` threshold) — route-level code splitting (`docs/16-Development-Standards.md` §70) not done yet, noted but not blocking
+  - [x] **Bundle size warning resolved (T-005, below)**
 - **Clients — done (first slice)**:
   - [x] Real domain model (`src/features/clients/domain/client.types.ts`), repository interface + Supabase implementation, mapper — `clients` table typed with its full real column set (`telephone`, `courriel`, `code_postal`, `notes`, `statut`, `langue`, `created_at`, per `reca-app`'s migrations including the later `20260719000000_clients_statut_langue.sql`), not just the minimal subset used for Mission joins
   - [x] `src/domain/clientStatus.ts` — real `ClientStatus` (`actif`/`inactif`, no anti-corruption mapping needed, the two DB values read fine as-is) and real `ContractStatus` (`actif`/`en_attente`/`expire`/`annule`)
@@ -101,6 +101,18 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
   - [ ] No real permission-key system (`hasPermission()`, `RequirePermission`) — deferred until the docs' full permission matrix is actually validated and backed by real RLS (see `memory.md`); `canWrite()`/`isOperator()` in `session.ts` cover what's real today
   - [ ] MFA, invitations, password-change-while-logged-in, session-revocation admin UI, security-event audit log — all out of scope for this first slice, per docs §149's own "decisions to confirm before final implementation" list
   - [ ] `mobile-safari` (WebKit) Playwright project can't run in this dev sandbox — missing `msvcp140_1.dll`, a Windows system dependency outside repo control; `chromium` project is the one actually verified
+
+### T-005 — Route-level code splitting
+
+- **Status**: Done — build's "chunk larger than 500 kB" warning (had grown to 687 kB) is fully resolved, no warnings at all now. Verified live: every route navigated to (Missions/Routes/Clients/Contrats) loaded its lazy chunk instantly with no visible flash or console error; Playwright's login test (which now exercises the lazy `LoginPage` chunk) still passes.
+- **Priority**: Low (perf, not correctness)
+- **Dependencies**: none
+- **What's built**:
+  - [x] `src/routes/lazyPages.tsx` — every feature page (Dashboard, Missions, Routes, Clients, Contracts, the wizard, and `LoginPage`) is `React.lazy()`-loaded. Isolated in its own file rather than inline in `router.tsx` specifically to avoid `react-refresh/only-export-components` warnings (10 of them, checked and fixed rather than left as new lint noise).
+  - [x] `AppShell` wraps `<Outlet />` in a `<Suspense>` with a simple "Chargement…" fallback; the public `/login` route (outside `AppShell`, so outside that boundary) gets its own `<Suspense>` in `router.tsx`.
+  - [x] `LoginPage` is imported directly from its own file in `lazyPages.tsx`, **not** through `features/auth`'s barrel `index.ts` — the barrel is also imported eagerly (for `RequireAuth`), and importing `LoginPage` through the same barrel let the bundler fold it back into the eager chunk (`INEFFECTIVE_DYNAMIC_IMPORT` build warning caught this). Removed `LoginPage` from that barrel's exports entirely once found.
+  - [x] `vite.config.ts`: vendor code split into `react-vendor`/`supabase-vendor`/`query-vendor`/`forms-vendor`/`vendor` chunks via `build.rolldownOptions.output.codeSplitting.groups` — **not** `rollupOptions.output.manualChunks`, which is deprecated/ignored on this project's Vite 8 (it uses the Rolldown bundler, confirmed by reading `vite`'s own type definitions rather than guessing from older Rollup-era docs/tutorials).
+  - [x] Result: main entry chunk dropped from 687 kB to ~15 kB; largest chunk is now `react-vendor` at ~309 kB, comfortably under the 500 kB warning threshold.
 
 ---
 
