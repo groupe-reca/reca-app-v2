@@ -71,6 +71,18 @@ export const EquipmentDetailPage = lazy(() =>
 export const EquipmentCreatePage = lazy(() =>
   import('@/features/equipments').then((m) => ({ default: m.EquipmentCreatePage })),
 )
+export const InvoiceListPage = lazy(() =>
+  import('@/features/invoices').then((m) => ({ default: m.InvoiceListPage })),
+)
+export const InvoiceDetailPage = lazy(() =>
+  import('@/features/invoices').then((m) => ({ default: m.InvoiceDetailPage })),
+)
+export const InvoiceCreatePage = lazy(() =>
+  import('@/features/invoices').then((m) => ({ default: m.InvoiceCreatePage })),
+)
+export const PaymentListPage = lazy(() =>
+  import('@/features/payments').then((m) => ({ default: m.PaymentListPage })),
+)
 // Pulls react-hook-form/zod out of the eager entry chunk — LoginPage is
 // the only route rendered before RequireAuth's Suspense boundary
 // exists, so it needs its own. Imported from its own file rather than

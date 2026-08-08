@@ -10,13 +10,13 @@
 // mission_notes, users (Auth module), clients (Clients module, full
 // columns), leads (Leads module, full columns), quotes (Quotes module,
 // full columns), employees/equipments (Employees/Equipment modules,
-// full columns), route_contracts (minimal), routes (minimal), contracts
+// full columns), invoices/payments (Invoices/Payments modules, full
+// columns), route_contracts (minimal), routes (minimal), contracts
 // (columns needed for the client's contract list — not yet the full
 // contract-wizard field set, e.g. clauses/taxes/geometry are still
-// missing). Other tables exist in the shared DB (invoices, payments,
-// employee_equipment, ...) but are not typed here yet — add them as
-// their modules are scoped, following the same migration-file
-// cross-check process
+// missing). Other tables exist in the shared DB (employee_equipment,
+// ...) but are not typed here yet — add them as their modules are
+// scoped, following the same migration-file cross-check process
 // (docs/adr/ADR-002-operator-contracts.md).
 //
 // This file is committed per memory.md ("DB type generation") — do not
@@ -487,6 +487,76 @@ export interface Database {
           deleted_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['quotes']['Insert']>
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          id: string
+          numero: string | null
+          client_id: string
+          contrat_id: string | null
+          date: string
+          sous_total: number
+          tps: number
+          tvq: number
+          total: number
+          solde: number
+          statut:
+            | 'brouillon'
+            | 'envoyee'
+            | 'payee'
+            | 'partiellement_payee'
+            | 'en_retard'
+            | 'annulee'
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          numero?: string | null
+          client_id: string
+          contrat_id?: string | null
+          date?: string
+          sous_total?: number
+          tps?: number
+          tvq?: number
+          total?: number
+          solde?: number
+          statut?: Database['public']['Tables']['invoices']['Row']['statut']
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['invoices']['Insert']>
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          id: string
+          facture_id: string
+          montant: number
+          methode: string | null
+          reference: string | null
+          date: string
+          notes: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          facture_id: string
+          montant: number
+          methode?: string | null
+          reference?: string | null
+          date?: string
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['payments']['Insert']>
         Relationships: []
       }
     }

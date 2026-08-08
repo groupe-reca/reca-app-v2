@@ -27,6 +27,10 @@ import {
   EquipmentListPage,
   EquipmentDetailPage,
   EquipmentCreatePage,
+  InvoiceListPage,
+  InvoiceDetailPage,
+  InvoiceCreatePage,
+  PaymentListPage,
 } from './lazyPages'
 
 export const router = createBrowserRouter([
@@ -81,6 +85,26 @@ export const router = createBrowserRouter([
             path: 'clients/:clientId',
             element: <ClientDetailPage />,
             handle: { breadcrumb: 'Client' },
+          },
+          {
+            path: 'invoices',
+            element: <InvoiceListPage />,
+            handle: { breadcrumb: 'Factures' },
+          },
+          {
+            path: 'invoices/new',
+            element: <InvoiceCreatePage />,
+            handle: { breadcrumb: 'Nouvelle facture' },
+          },
+          {
+            path: 'invoices/:invoiceId',
+            element: <InvoiceDetailPage />,
+            handle: { breadcrumb: 'Facture' },
+          },
+          {
+            path: 'payments',
+            element: <PaymentListPage />,
+            handle: { breadcrumb: 'Paiements' },
           },
           {
             path: 'employees',
