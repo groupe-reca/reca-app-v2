@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { AppShell } from '@/layouts/AppShell'
 import { DashboardPage } from '@/features/dashboard'
 import { MissionListPage, MissionDetailPage } from '@/features/missions'
-import { ClientDetailPage } from '@/features/clients'
+import { ClientListPage, ClientDetailPage } from '@/features/clients'
 import { ContractWizardPage } from '@/features/contracts'
 import { LoginPage, RequireAuth } from '@/features/auth'
 import { NotFoundPage } from '@/features/misc/pages/NotFoundPage'
@@ -35,6 +35,11 @@ export const router = createBrowserRouter([
             path: 'missions/:missionId',
             element: <MissionDetailPage />,
             handle: { breadcrumb: 'Mission' },
+          },
+          {
+            path: 'clients',
+            element: <ClientListPage />,
+            handle: { breadcrumb: 'Clients' },
           },
           {
             path: 'clients/:clientId',

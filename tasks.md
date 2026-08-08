@@ -39,11 +39,11 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
   - [x] Core UI primitives: `Button`, `StatusBadge`, `Card`/`CardHeader`, `StatTile`, `ProgressBar`, `EmptyState` in `src/components/ui/`
   - [ ] Real icon system — not decided yet, nav/UI currently text-only (no invented icon set)
   - [ ] Real Mapbox integration for the two map placeholders in Dashboard/Mission detail — deferred, needs a Mapbox token decision
-  - [ ] All data is mock data (`src/features/*/mocks.ts`) — not wired to the real shared Supabase schema yet (depends on `database.types.ts` being regenerated, see T-001)
+  - [x] Missions and Clients (both list + detail) are now wired to real data (T-003); only `ContractWizardPage`'s submit is still mock (no `contracts` write repository built yet)
 
 ### T-003 — Business modules
 
-- **Status**: In progress — Missions module built end-to-end against the real shared Supabase project, **and confirmed showing real data** signed in as an actual admin account (real missions, real residences with real client names joined through `mission_items → contracts → clients`, correct status badges throughout). Other 9 modules not started.
+- **Status**: In progress — Missions and Clients modules built end-to-end against the real shared Supabase project, both **confirmed showing real data** signed in as an actual admin account. Other 8 modules not started.
 - **Priority**: Medium
 - **Dependencies**: T-002 Master UI patterns (done).
 - **Missions — done (first slice)**:
@@ -58,8 +58,16 @@ Purpose: work to be done, status, priority, dependencies, acceptance criteria (p
     - `MissionDetailPage` shows the right action buttons per status (Démarrer when `PLANNED`, Terminer/Terminer avec anomalies when `IN_PROGRESS`, nothing on terminal states) and an editable status `<select>` per résidence
     - **"Assign operator/equipment" was scoped out, not built**: `reca-app`'s real `missions.service.ts` has no post-creation reassignment function — operator/equipment are only set at mission creation (`createMission`). Building a fake "Assigner" mutation would have been inventing a capability that doesn't exist in the reference system; the placeholder button from T-002 was removed instead of wired to nothing.
     - Verified live signed in as the real `administrateur` account: changed a real résidence's status via the dropdown (À faire → En cours), confirmed the real write + refetch round-tripped correctly (badge updated, no optimistic-UI trick involved), then reverted it back to leave the data as found. Mission-level `Démarrer` wasn't clicked live — no `PLANIFIÉE` mission currently exists in the shared dev data to test it non-destructively — but the conditional button rendering was confirmed correct for the `EN COURS` state, and the code mirrors the read-path pattern already proven working.
-  - [ ] Bundle size warning at build (`665 kB`, `> 500 kB` threshold) — route-level code splitting (`docs/16-Development-Standards.md` §70) not done yet, noted but not blocking
-- **Remaining 9 modules**: not yet scoped. Per `docs/00-Vision.md` §33 and §14: Leads, Soumissions, Clients, Contrats, Routes, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, following the same real-schema cross-check process used for Missions (read `reca-app`'s migrations, don't guess column names).
+  - [ ] Bundle size warning at build (`671 kB`, `> 500 kB` threshold) — route-level code splitting (`docs/16-Development-Standards.md` §70) not done yet, noted but not blocking
+- **Clients — done (first slice)**:
+  - [x] Real domain model (`src/features/clients/domain/client.types.ts`), repository interface + Supabase implementation, mapper — `clients` table typed with its full real column set (`telephone`, `courriel`, `code_postal`, `notes`, `statut`, `langue`, `created_at`, per `reca-app`'s migrations including the later `20260719000000_clients_statut_langue.sql`), not just the minimal subset used for Mission joins
+  - [x] `src/domain/clientStatus.ts` — real `ClientStatus` (`actif`/`inactif`, no anti-corruption mapping needed, the two DB values read fine as-is) and real `ContractStatus` (`actif`/`en_attente`/`expire`/`annule`)
+  - [x] New `ClientListPage` (`/clients`) — this route didn't exist before (T-002 only built the detail page); added to match the Missions module's list+detail pattern
+  - [x] `ClientDetailPage` rewritten from T-002 mock data to real data: real contracts tab (from the real `contracts` table, not invoices/payments — see below), notes, contact info
+  - [x] **Dropped the fictional "Solde" (balance) stat from T-002's mock**: checked `reca-app`'s real `ClientContractsCard`/`ClientInvoicesCard` and confirmed there is no "solde" concept computed anywhere in the reference app either — it shows a contracts total and a separate invoices total, no combined balance. Since the Invoices module isn't built yet, the client detail now shows a real "Valeur des contrats" stat instead of an invented balance figure.
+  - [x] `database.types.ts`: expanded `contracts` with `saison`/`date_signature`/`date_debut`/`date_fin` (needed for the contracts list); money values (`contracts.prix`) are stored as decimal dollars in the DB, converted to `MoneyCents` in the mapper to match this app's `docs/16-Development-Standards.md` §25 money convention
+  - [x] Verified live signed in as the real `administrateur` account: 30 real clients listed with real names/phones/cities, opened a real client (Claude Lemire) showing a real address, real contract (CTR-000055, 1 000,00 $, ACTIF) — money conversion confirmed correct
+- **Remaining 8 modules**: not yet scoped. Per `docs/00-Vision.md` §33 and §14: Leads, Soumissions, Contrats, Routes, Employés, Équipements, Factures, Paiements, Paramètres — each derived from the Master UI patterns built in T-002, following the same real-schema cross-check process used for Missions and Clients (read `reca-app`'s migrations, don't guess column names).
 
 ### T-004 — Auth module
 

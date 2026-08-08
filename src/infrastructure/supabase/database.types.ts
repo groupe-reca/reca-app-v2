@@ -7,12 +7,15 @@
 // let that run for real and should replace this file when available.
 //
 // Tables typed so far: missions, mission_items, mission_events,
-// mission_notes, users (Auth module), plus the minimal columns of
-// routes/route_contracts/employees/equipments/contracts/clients
-// needed to join and display them. Other tables exist in the shared DB
-// (leads, quotes, invoices, payments, ...) but are not typed here yet
-// — add them as their modules are scoped, following the same
-// migration-file cross-check process (docs/adr/ADR-002-operator-contracts.md).
+// mission_notes, users (Auth module), clients (Clients module, full
+// columns), routes/route_contracts/employees/equipments (minimal
+// columns needed to join and display them), contracts (columns needed
+// for the client's contract list — not yet the full contract-wizard
+// field set, e.g. clauses/taxes/geometry are still missing). Other
+// tables exist in the shared DB (leads, quotes, invoices, payments,
+// ...) but are not typed here yet — add them as their modules are
+// scoped, following the same migration-file cross-check process
+// (docs/adr/ADR-002-operator-contracts.md).
 //
 // This file is committed per memory.md ("DB type generation") — do not
 // hand-edit casually without re-checking against reca-app's migrations
@@ -284,8 +287,12 @@ export interface Database {
           numero: string | null
           client_id: string
           type: string | null
+          saison: string | null
           statut: 'actif' | 'en_attente' | 'expire' | 'annule'
           prix: number | null
+          date_signature: string | null
+          date_debut: string | null
+          date_fin: string | null
           deleted_at: string | null
         }
         Insert: {
@@ -293,8 +300,12 @@ export interface Database {
           numero?: string | null
           client_id: string
           type?: string | null
+          saison?: string | null
           statut?: Database['public']['Tables']['contracts']['Row']['statut']
           prix?: number | null
+          date_signature?: string | null
+          date_debut?: string | null
+          date_fin?: string | null
           deleted_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['contracts']['Insert']>
@@ -307,9 +318,16 @@ export interface Database {
           prenom: string | null
           nom: string | null
           entreprise: string | null
+          telephone: string | null
+          courriel: string | null
           adresse: string | null
           ville: string | null
+          code_postal: string | null
           type_client: string | null
+          notes: string | null
+          statut: 'actif' | 'inactif'
+          langue: 'francais' | 'anglais'
+          created_at: string
           deleted_at: string | null
         }
         Insert: {
@@ -318,9 +336,16 @@ export interface Database {
           prenom?: string | null
           nom?: string | null
           entreprise?: string | null
+          telephone?: string | null
+          courriel?: string | null
           adresse?: string | null
           ville?: string | null
+          code_postal?: string | null
           type_client?: string | null
+          notes?: string | null
+          statut?: Database['public']['Tables']['clients']['Row']['statut']
+          langue?: Database['public']['Tables']['clients']['Row']['langue']
+          created_at?: string
           deleted_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['clients']['Insert']>
