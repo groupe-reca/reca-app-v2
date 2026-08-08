@@ -8,14 +8,14 @@
 //
 // Tables typed so far: missions, mission_items, mission_events,
 // mission_notes, users (Auth module), clients (Clients module, full
-// columns), leads (Leads module, full columns), routes/route_contracts/
-// employees/equipments (minimal columns needed to join and display
-// them), contracts (columns needed for the client's contract list —
-// not yet the full contract-wizard field set, e.g. clauses/taxes/
-// geometry are still missing). Other tables exist in the shared DB
-// (quotes, invoices, payments, ...) but are not typed here yet — add
-// them as their modules are scoped, following the same migration-file
-// cross-check process
+// columns), leads (Leads module, full columns), quotes (Quotes module,
+// full columns), routes/route_contracts/employees/equipments (minimal
+// columns needed to join and display them), contracts (columns needed
+// for the client's contract list — not yet the full contract-wizard
+// field set, e.g. clauses/taxes/geometry are still missing). Other
+// tables exist in the shared DB (invoices, payments, ...) but are not
+// typed here yet — add them as their modules are scoped, following the
+// same migration-file cross-check process
 // (docs/adr/ADR-002-operator-contracts.md).
 //
 // This file is committed per memory.md ("DB type generation") — do not
@@ -424,6 +424,40 @@ export interface Database {
           deleted_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['leads']['Insert']>
+        Relationships: []
+      }
+      quotes: {
+        Row: {
+          id: string
+          numero: string | null
+          lead_id: string | null
+          client_id: string | null
+          montant: number
+          taxes: number
+          total: number
+          statut: 'brouillon' | 'envoyee' | 'acceptee' | 'refusee' | 'expiree'
+          expiration: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          numero?: string | null
+          lead_id?: string | null
+          client_id?: string | null
+          montant?: number
+          taxes?: number
+          total?: number
+          statut?: Database['public']['Tables']['quotes']['Row']['statut']
+          expiration?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: Partial<Database['public']['Tables']['quotes']['Insert']>
         Relationships: []
       }
     }

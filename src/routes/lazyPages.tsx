@@ -44,6 +44,15 @@ export const LeadDetailPage = lazy(() =>
 export const LeadCreatePage = lazy(() =>
   import('@/features/leads').then((m) => ({ default: m.LeadCreatePage })),
 )
+export const QuoteListPage = lazy(() =>
+  import('@/features/quotes').then((m) => ({ default: m.QuoteListPage })),
+)
+export const QuoteDetailPage = lazy(() =>
+  import('@/features/quotes').then((m) => ({ default: m.QuoteDetailPage })),
+)
+export const QuoteCreatePage = lazy(() =>
+  import('@/features/quotes').then((m) => ({ default: m.QuoteCreatePage })),
+)
 // Pulls react-hook-form/zod out of the eager entry chunk — LoginPage is
 // the only route rendered before RequireAuth's Suspense boundary
 // exists, so it needs its own. Imported from its own file rather than

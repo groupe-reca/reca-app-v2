@@ -3,6 +3,7 @@ import { SupabaseClientRepository } from '@/features/clients/infrastructure/clie
 import { SupabaseRouteRepository } from '@/features/routes/infrastructure/route.repository'
 import { SupabaseContractRepository } from '@/features/contracts/infrastructure/contract.repository'
 import { SupabaseLeadRepository } from '@/features/leads/infrastructure/lead.repository'
+import { SupabaseQuoteRepository } from '@/features/quotes/infrastructure/quote.repository'
 
 // docs/03-Application-Architecture.md §89 — concrete adapters assembled
 // in one place; use cases/hooks depend on the interfaces, not on this
@@ -13,4 +14,5 @@ export const dependencies = {
   routeRepository: new SupabaseRouteRepository(),
   contractRepository: new SupabaseContractRepository(),
   leadRepository: new SupabaseLeadRepository(),
+  quoteRepository: new SupabaseQuoteRepository(),
 }

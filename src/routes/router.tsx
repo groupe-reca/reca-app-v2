@@ -18,6 +18,9 @@ import {
   LeadListPage,
   LeadDetailPage,
   LeadCreatePage,
+  QuoteListPage,
+  QuoteDetailPage,
+  QuoteCreatePage,
 } from './lazyPages'
 
 export const router = createBrowserRouter([
@@ -87,6 +90,21 @@ export const router = createBrowserRouter([
             path: 'leads/:leadId',
             element: <LeadDetailPage />,
             handle: { breadcrumb: 'Lead' },
+          },
+          {
+            path: 'quotes',
+            element: <QuoteListPage />,
+            handle: { breadcrumb: 'Soumissions' },
+          },
+          {
+            path: 'quotes/new',
+            element: <QuoteCreatePage />,
+            handle: { breadcrumb: 'Nouvelle soumission' },
+          },
+          {
+            path: 'quotes/:quoteId',
+            element: <QuoteDetailPage />,
+            handle: { breadcrumb: 'Soumission' },
           },
           {
             path: 'contracts',
