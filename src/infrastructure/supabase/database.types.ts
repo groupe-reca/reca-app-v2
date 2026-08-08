@@ -9,13 +9,14 @@
 // Tables typed so far: missions, mission_items, mission_events,
 // mission_notes, users (Auth module), clients (Clients module, full
 // columns), leads (Leads module, full columns), quotes (Quotes module,
-// full columns), routes/route_contracts/employees/equipments (minimal
-// columns needed to join and display them), contracts (columns needed
-// for the client's contract list — not yet the full contract-wizard
-// field set, e.g. clauses/taxes/geometry are still missing). Other
-// tables exist in the shared DB (invoices, payments, ...) but are not
-// typed here yet — add them as their modules are scoped, following the
-// same migration-file cross-check process
+// full columns), employees/equipments (Employees/Equipment modules,
+// full columns), route_contracts (minimal), routes (minimal), contracts
+// (columns needed for the client's contract list — not yet the full
+// contract-wizard field set, e.g. clauses/taxes/geometry are still
+// missing). Other tables exist in the shared DB (invoices, payments,
+// employee_equipment, ...) but are not typed here yet — add them as
+// their modules are scoped, following the same migration-file
+// cross-check process
 // (docs/adr/ADR-002-operator-contracts.md).
 //
 // This file is committed per memory.md ("DB type generation") — do not
@@ -244,7 +245,12 @@ export interface Database {
           courriel: string | null
           poste: string | null
           role: string | null
+          date_embauche: string | null
           actif: boolean
+          photo: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
           deleted_at: string | null
         }
         Insert: {
@@ -256,7 +262,12 @@ export interface Database {
           courriel?: string | null
           poste?: string | null
           role?: string | null
+          date_embauche?: string | null
           actif?: boolean
+          photo?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
           deleted_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['employees']['Insert']>
@@ -268,7 +279,16 @@ export interface Database {
           numero: string | null
           nom: string
           categorie: string | null
+          marque: string | null
+          modele: string | null
+          annee: number | null
+          plaque: string | null
+          numero_serie: string | null
           statut: 'disponible' | 'en_operation' | 'entretien' | 'brise'
+          entretien: string | null
+          notes: string | null
+          created_at: string
+          updated_at: string
           deleted_at: string | null
         }
         Insert: {
@@ -276,7 +296,16 @@ export interface Database {
           numero?: string | null
           nom: string
           categorie?: string | null
+          marque?: string | null
+          modele?: string | null
+          annee?: number | null
+          plaque?: string | null
+          numero_serie?: string | null
           statut?: Database['public']['Tables']['equipments']['Row']['statut']
+          entretien?: string | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
           deleted_at?: string | null
         }
         Update: Partial<Database['public']['Tables']['equipments']['Insert']>

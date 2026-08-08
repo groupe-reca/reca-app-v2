@@ -53,6 +53,24 @@ export const QuoteDetailPage = lazy(() =>
 export const QuoteCreatePage = lazy(() =>
   import('@/features/quotes').then((m) => ({ default: m.QuoteCreatePage })),
 )
+export const EmployeeListPage = lazy(() =>
+  import('@/features/employees').then((m) => ({ default: m.EmployeeListPage })),
+)
+export const EmployeeDetailPage = lazy(() =>
+  import('@/features/employees').then((m) => ({ default: m.EmployeeDetailPage })),
+)
+export const EmployeeCreatePage = lazy(() =>
+  import('@/features/employees').then((m) => ({ default: m.EmployeeCreatePage })),
+)
+export const EquipmentListPage = lazy(() =>
+  import('@/features/equipments').then((m) => ({ default: m.EquipmentListPage })),
+)
+export const EquipmentDetailPage = lazy(() =>
+  import('@/features/equipments').then((m) => ({ default: m.EquipmentDetailPage })),
+)
+export const EquipmentCreatePage = lazy(() =>
+  import('@/features/equipments').then((m) => ({ default: m.EquipmentCreatePage })),
+)
 // Pulls react-hook-form/zod out of the eager entry chunk — LoginPage is
 // the only route rendered before RequireAuth's Suspense boundary
 // exists, so it needs its own. Imported from its own file rather than

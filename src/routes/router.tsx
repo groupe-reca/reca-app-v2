@@ -21,6 +21,12 @@ import {
   QuoteListPage,
   QuoteDetailPage,
   QuoteCreatePage,
+  EmployeeListPage,
+  EmployeeDetailPage,
+  EmployeeCreatePage,
+  EquipmentListPage,
+  EquipmentDetailPage,
+  EquipmentCreatePage,
 } from './lazyPages'
 
 export const router = createBrowserRouter([
@@ -75,6 +81,36 @@ export const router = createBrowserRouter([
             path: 'clients/:clientId',
             element: <ClientDetailPage />,
             handle: { breadcrumb: 'Client' },
+          },
+          {
+            path: 'employees',
+            element: <EmployeeListPage />,
+            handle: { breadcrumb: 'Employés' },
+          },
+          {
+            path: 'employees/new',
+            element: <EmployeeCreatePage />,
+            handle: { breadcrumb: 'Nouvel employé' },
+          },
+          {
+            path: 'employees/:employeeId',
+            element: <EmployeeDetailPage />,
+            handle: { breadcrumb: 'Employé' },
+          },
+          {
+            path: 'equipments',
+            element: <EquipmentListPage />,
+            handle: { breadcrumb: 'Équipements' },
+          },
+          {
+            path: 'equipments/new',
+            element: <EquipmentCreatePage />,
+            handle: { breadcrumb: 'Nouvel équipement' },
+          },
+          {
+            path: 'equipments/:equipmentId',
+            element: <EquipmentDetailPage />,
+            handle: { breadcrumb: 'Équipement' },
           },
           {
             path: 'leads',
